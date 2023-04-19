@@ -1,5 +1,6 @@
 package com.nf.mvc;
 
+import com.nf.mvc.adapters.AnnotationMethodRequestMappingHandlerAdapter;
 import com.nf.mvc.adapters.HttpRequestHandlerAdapter;
 import com.nf.mvc.adapters.MethodNameHandlerAdapter;
 import com.nf.mvc.mapping.AnnotationMethodRequestMappingHandlerMapping;
@@ -89,6 +90,7 @@ public class DispatcherServlet extends HttpServlet  {
         List<HandlerAdapter> adapters = new ArrayList<>();
         adapters.add(new HttpRequestHandlerAdapter());
         adapters.add(new MethodNameHandlerAdapter());
+        adapters.add(new AnnotationMethodRequestMappingHandlerAdapter());
         return adapters;
     }
 
@@ -109,10 +111,15 @@ public class DispatcherServlet extends HttpServlet  {
             return;
         }
         ViewResult viewResult = this.getHandlerAdapter(req, resp, handler);
-        if (viewResult==null){
-            viewResult = new VoidView();
+        this.render(req, resp, viewResult);
+    }
+
+    private void render(HttpServletRequest req, HttpServletResponse resp, ViewResult viewResult) throws ServletException, IOException {
+        if (viewResult !=null) {
+            if (viewResult instanceof ViewResult){
+                viewResult.render(req, resp);
+            }
         }
-        viewResult.render(req, resp);
     }
 
     protected String getUri(HttpServletRequest req) {

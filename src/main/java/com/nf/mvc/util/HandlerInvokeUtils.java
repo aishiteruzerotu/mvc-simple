@@ -2,7 +2,6 @@ package com.nf.mvc.util;
 
 import com.nf.mvc.Handler;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class HandlerInvokeUtils {
