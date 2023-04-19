@@ -9,7 +9,7 @@ public class ScanUtils {
     public static ScanResult scan(String scanPackage){
         ClassGraph classGraph = new ClassGraph();
         classGraph.enableAllInfo();
-        classGraph.acceptClasses(scanPackage);
+        classGraph.acceptPackages(scanPackage);
         return classGraph.scan();
     }
 }

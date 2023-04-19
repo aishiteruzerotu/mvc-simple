@@ -1,8 +1,11 @@
 package com.nf.mvc;
 
 import com.nf.mvc.adapters.HttpRequestHandlerAdapter;
+import com.nf.mvc.adapters.MethodNameHandlerAdapter;
+import com.nf.mvc.mapping.AnnotationMethodRequestMappingHandlerMapping;
 import com.nf.mvc.mapping.NameConventionHandlerMapping;
 import com.nf.mvc.util.ScanUtils;
+import com.nf.mvc.view.VoidView;
 import io.github.classgraph.ScanResult;
 
 import javax.servlet.ServletConfig;
@@ -17,33 +20,23 @@ import java.util.List;
 public class DispatcherServlet extends HttpServlet  {
     private static final String COMPONENT_SCAN = "scanPackage";
 
-    protected List<HandlerMapping> mappings = new ArrayList<>();
-    protected List<HandlerAdapter> adapters = new ArrayList<>();
+    protected List<HandlerMapping> handlerMappings = new ArrayList<>();
+    protected List<HandlerAdapter> handlerAdapters = new ArrayList<>();
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         this.initSetScanResult(config);
-        this.initHandlerMappingList();
-        this.initHandlerAdapterList();
+        this.initHandlerMappings();
+        this.initHandlerAdapters();
     }
 
-    private void initSetScanResult(ServletConfig config) {
+    protected void initSetScanResult(ServletConfig config) {
         String scanPackage = this.getInitParameter(config);
         ScanResult scanResult = ScanUtils.scan(scanPackage);
-        MvcContext.getMvcContext().config(scanResult);
+        this.initMvcContext(scanResult);
     }
 
-    private void initHandlerMappingList() {
-
-        this.mappings.add(new NameConventionHandlerMapping());
-    }
-
-    private void initHandlerAdapterList() {
-
-        this.adapters.add(new HttpRequestHandlerAdapter());
-    }
-
-    private String getInitParameter(ServletConfig config) {
+    protected String getInitParameter(ServletConfig config) {
         String initParameter = config.getInitParameter(COMPONENT_SCAN);
         if (initParameter==null||initParameter.isEmpty()){
             throw new RuntimeException("找不到需要扫描的包");
@@ -51,34 +44,85 @@ public class DispatcherServlet extends HttpServlet  {
         return initParameter;
     }
 
+    private void initMvcContext(ScanResult scanResult) {
+        MvcContext.getMvcContext().config(scanResult);
+    }
+
+    private void initHandlerMappings() {
+        //优先添加用户自定义的HandlerMapping
+        List<HandlerMapping> customHandlerMappings = getCustomHandlerMappings();
+        //mvc框架自身的HandlerMapping优先级更低，后注册
+        List<HandlerMapping> defaultHandlerMappings = getDefaultHandlerMappings();
+
+        handlerMappings.addAll(customHandlerMappings);
+        handlerMappings.addAll(defaultHandlerMappings);
+    }
+
+    protected List<HandlerMapping> getCustomHandlerMappings() {
+        return MvcContext.getMvcContext().getHandlerMappings();
+    }
+
+    protected List<HandlerMapping> getDefaultHandlerMappings() {
+        List<HandlerMapping> mappings = new ArrayList<>();
+        mappings.add(new NameConventionHandlerMapping());
+        mappings.add(new AnnotationMethodRequestMappingHandlerMapping());
+        return mappings;
+    }
+
+    private void initHandlerAdapters() {
+
+        //优先添加用户自定义的HandlerAdapter
+        List<HandlerAdapter> customHandlerAdapters = getCustomHandlerAdapters();
+        //mvc框架自身的HandlerAdapter优先级更低，后注册
+        List<HandlerAdapter> defaultHandlerAdapters = getDefaultHandlerAdapters();
+
+        handlerAdapters.addAll(customHandlerAdapters);
+        handlerAdapters.addAll(defaultHandlerAdapters);
+
+    }
+
+    protected List<HandlerAdapter> getCustomHandlerAdapters() {
+        return MvcContext.getMvcContext().getHandlerAdapters();
+    }
+
+    protected List<HandlerAdapter> getDefaultHandlerAdapters() {
+        List<HandlerAdapter> adapters = new ArrayList<>();
+        adapters.add(new HttpRequestHandlerAdapter());
+        adapters.add(new MethodNameHandlerAdapter());
+        return adapters;
+    }
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = this.getUri(req);
         try {
-            Object handler = this.getHandlerMapping(uri);
+            Handler handler = this.getHandlerMapping(uri);
             this.doService(req, resp, handler);
         } catch (Exception ex) {
             System.out.println("yichang dispatcher------");
         }
     }
 
-    private void doService(HttpServletRequest req, HttpServletResponse resp, Object handler) throws Exception {
+    protected void doService(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {
         if (handler==null){
             resp.sendError(HttpServletResponse.SC_NOT_FOUND);
             return;
         }
         ViewResult viewResult = this.getHandlerAdapter(req, resp, handler);
+        if (viewResult==null){
+            viewResult = new VoidView();
+        }
         viewResult.render(req, resp);
     }
 
-    private String getUri(HttpServletRequest req) {
+    protected String getUri(HttpServletRequest req) {
         String contextPath= req.getContextPath();
         return req.getRequestURI().substring(contextPath.length());
     }
 
-    private Object getHandlerMapping(String uri) throws Exception {
-        for (HandlerMapping mapping : this.mappings) {
-            Object handler = mapping.getHandler(uri);
+    protected Handler getHandlerMapping(String uri) throws Exception {
+        for (HandlerMapping mapping : this.handlerMappings) {
+            Handler handler = mapping.getHandler(uri);
             if (handler!=null) {
                 return handler;
             }
@@ -86,8 +130,8 @@ public class DispatcherServlet extends HttpServlet  {
         return null;
     }
 
-    private ViewResult getHandlerAdapter(HttpServletRequest req, HttpServletResponse resp,Object handler) throws Exception{
-        for (HandlerAdapter adapter : this.adapters) {
+    protected ViewResult getHandlerAdapter(HttpServletRequest req, HttpServletResponse resp,Handler handler) throws Exception{
+        for (HandlerAdapter adapter : this.handlerAdapters) {
             if (adapter.supports(handler)) {
                 return adapter.handle(req,resp,handler);
             }

@@ -18,17 +18,20 @@
         <artifactId>javax.servlet-api</artifactId>
         <version>4.0.1</version>
         <scope>provided</scope>
+        <optional>true</optional>
     </dependency>
     <!-- https://mvnrepository.com/artifact/io.github.classgraph/classgraph -->
     <dependency>
         <groupId>io.github.classgraph</groupId>
         <artifactId>classgraph</artifactId>
         <version>4.8.157</version>
+        <optional>true</optional>
     </dependency>
     <dependency>
         <groupId>org.javassist</groupId>
         <artifactId>javassist</artifactId>
         <version>3.28.0-GA</version>
+        <optional>true</optional>
     </dependency>
 </dependencies>
 </project>

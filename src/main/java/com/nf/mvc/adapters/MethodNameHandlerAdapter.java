@@ -1,8 +1,11 @@
 package com.nf.mvc.adapters;
 
+import com.nf.mvc.Handler;
 import com.nf.mvc.HandlerAdapter;
 import com.nf.mvc.HandlerInfo;
 import com.nf.mvc.ViewResult;
+import com.nf.mvc.util.HandlerInvokeUtils;
+import com.nf.mvc.view.VoidView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,30 +17,12 @@ import java.lang.reflect.Method;
  */
 public class MethodNameHandlerAdapter implements HandlerAdapter {
     @Override
-    public boolean supports(Object handler) {
-        if(handler instanceof HandlerInfo){
-
-            HandlerInfo handlerInfo = (HandlerInfo)handler;
-            Class<?> handlerClass = handlerInfo.getClz();
-            try {
-                Method method = handlerClass.getDeclaredMethod("process");
-                return  method !=null;
-            } catch (NoSuchMethodException e) {
-               return false;
-            }
-        }
-        return false;
+    public boolean supports(Handler handler) {
+        return handler.getMethod().getName().equals("process");
     }
 
     @Override
-    public ViewResult handle(HttpServletRequest req, HttpServletResponse resp, Object handler) throws Exception {
-
-        HandlerInfo handlerInfo = (HandlerInfo)handler;
-        Class<?> handlerClass = handlerInfo.getClz();
-
-        Object instance = handlerClass.newInstance();
-        Method method = handlerClass.getDeclaredMethod("process");
-       return (ViewResult) method.invoke(instance);
-
+    public ViewResult handle(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {
+        return(VoidView) HandlerInvokeUtils.invoke(handler,req,resp);
     }
 }
