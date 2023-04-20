@@ -10,7 +10,7 @@ import com.nf.mvc.util.HandlerInvokeUtils;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-public class AnnotationMethodRequestMappingHandlerAdapter implements HandlerAdapter {
+public class MethodRequestMappingHandlerAdapter implements HandlerAdapter {
     @Override
     public boolean supports(Handler handler) {
         return handler!=null && handler instanceof Handler && handler.getMethod().isAnnotationPresent(RequestMapping.class);
