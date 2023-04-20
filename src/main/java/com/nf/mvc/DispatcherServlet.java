@@ -24,6 +24,7 @@ public class DispatcherServlet extends HttpServlet  {
     protected List<HandlerMapping> handlerMappings = new ArrayList<>();
     protected List<HandlerAdapter> handlerAdapters = new ArrayList<>();
 
+    //region 初始化逻辑
     @Override
     public void init(ServletConfig config) throws ServletException {
         this.initSetScanResult(config);
@@ -93,7 +94,9 @@ public class DispatcherServlet extends HttpServlet  {
         adapters.add(new AnnotationMethodRequestMappingHandlerAdapter());
         return adapters;
     }
+    //endregion
 
+    //region 调用逻辑
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String uri = this.getUri(req);
@@ -145,4 +148,5 @@ public class DispatcherServlet extends HttpServlet  {
         }
         return null;
     }
+    //endregion
 }

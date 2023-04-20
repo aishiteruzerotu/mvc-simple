@@ -26,20 +26,21 @@ public class CallParametersUtils {
             return new Object[0];
         }
 
-        String[] strings = new String[parameterCount];
+        Object[] objects = new Object[parameterCount];
         for (int i = 0; i < parameterCount; i++) {
             Parameter parameter = parameters[i];
             String key;
-            String value;
+            Object value;
             if (parameter.isAnnotationPresent(RequestParam.class)) {
                 key = parameter.getAnnotation(RequestParam.class).value();
             } else {
                 key = getName(handler,i);
             }
             value = req.getParameter(key);
-            strings[i] = value;
+            objects[i] = value;
         }
-        return Arrays.stream(strings).toArray();
+        //TODO: 类型转化的问题，暂时先不解决
+        return objects;
     }
 
     private static String getName(Handler handler,int index){

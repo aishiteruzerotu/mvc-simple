@@ -54,27 +54,20 @@ public class MvcContext {
         ClassInfoList allClasses = scanResult.getAllClasses();
         for (ClassInfo classInfo : allClasses) {
             Class<?> scanedClass = classInfo.loadClass();
-            if (HandlerMapping.class.isAssignableFrom(scanedClass)) {
-                HandlerMapping mapping = (HandlerMapping) ReflectionUtils.newInstance(scanedClass);
-                handlerMappings.add(mapping);
-            }
 
-            if (HandlerAdapter.class.isAssignableFrom(scanedClass)) {
-                HandlerAdapter adapter = (HandlerAdapter) ReflectionUtils.newInstance(scanedClass);
-                handlerAdapters.add(adapter);
-            }
-
-            if (MethodArgumentResolver.class.isAssignableFrom(scanedClass)) {
-                MethodArgumentResolver argumentResolver = (MethodArgumentResolver) ReflectionUtils.newInstance(scanedClass);
-                argumentResolvers.add(argumentResolver);
-            }
-
-            if (HandlerExceptionResolver.class.isAssignableFrom(scanedClass)) {
-                HandlerExceptionResolver exceptionResolver = (HandlerExceptionResolver) ReflectionUtils.newInstance(scanedClass);
-                exceptionResolvers.add(exceptionResolver);
-            }
+            this.setList(HandlerMapping.class,scanedClass,this.handlerMappings);
+            this.setList(HandlerAdapter.class,scanedClass,this.handlerAdapters);
+            this.setList(MethodArgumentResolver.class,scanedClass,this.argumentResolvers);
+            this.setList(HandlerExceptionResolver.class,scanedClass,this.exceptionResolvers);
 
             allScanedClasses.add(scanedClass);
+        }
+    }
+
+    private <T> void setList(Class<? extends T> clz,Class<?> scanedClass,List<T> arr){
+        if (clz.isAssignableFrom(scanedClass)) {
+            T exceptionResolver = (T) ReflectionUtils.newInstance(scanedClass);
+            arr.add(exceptionResolver);
         }
     }
 
