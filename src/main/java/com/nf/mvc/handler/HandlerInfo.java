@@ -1,4 +1,4 @@
-package com.nf.mvc;
+package com.nf.mvc.handler;
 
 public class HandlerInfo {
     Class<?> clz;

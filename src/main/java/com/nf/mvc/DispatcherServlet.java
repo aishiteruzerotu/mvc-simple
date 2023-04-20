@@ -6,7 +6,8 @@ import com.nf.mvc.adapters.MethodNameHandlerAdapter;
 import com.nf.mvc.mapping.AnnotationMethodRequestMappingHandlerMapping;
 import com.nf.mvc.mapping.NameConventionHandlerMapping;
 import com.nf.mvc.util.ScanUtils;
-import com.nf.mvc.view.VoidView;
+import com.nf.mvc.view.ToStringViewResult;
+import com.nf.mvc.view.VoidViewResult;
 import io.github.classgraph.ScanResult;
 
 import javax.servlet.ServletConfig;
@@ -66,8 +67,8 @@ public class DispatcherServlet extends HttpServlet  {
 
     protected List<HandlerMapping> getDefaultHandlerMappings() {
         List<HandlerMapping> mappings = new ArrayList<>();
-        mappings.add(new NameConventionHandlerMapping());
         mappings.add(new AnnotationMethodRequestMappingHandlerMapping());
+        mappings.add(new NameConventionHandlerMapping());
         return mappings;
     }
 
@@ -89,9 +90,9 @@ public class DispatcherServlet extends HttpServlet  {
 
     protected List<HandlerAdapter> getDefaultHandlerAdapters() {
         List<HandlerAdapter> adapters = new ArrayList<>();
+        adapters.add(new AnnotationMethodRequestMappingHandlerAdapter());
         adapters.add(new HttpRequestHandlerAdapter());
         adapters.add(new MethodNameHandlerAdapter());
-        adapters.add(new AnnotationMethodRequestMappingHandlerAdapter());
         return adapters;
     }
     //endregion
@@ -118,11 +119,7 @@ public class DispatcherServlet extends HttpServlet  {
     }
 
     private void render(HttpServletRequest req, HttpServletResponse resp, ViewResult viewResult) throws ServletException, IOException {
-        if (viewResult !=null) {
-            if (viewResult instanceof ViewResult){
-                viewResult.render(req, resp);
-            }
-        }
+        viewResult.render(req,resp);
     }
 
     protected String getUri(HttpServletRequest req) {

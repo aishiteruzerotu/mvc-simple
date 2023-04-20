@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class VoidView extends ViewResult {
+public class VoidViewResult extends ViewResult {
     @Override
     public void render(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 

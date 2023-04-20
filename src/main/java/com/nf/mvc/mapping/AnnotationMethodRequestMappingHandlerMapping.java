@@ -1,7 +1,7 @@
 package com.nf.mvc.mapping;
 
 import com.nf.mvc.Handler;
-import com.nf.mvc.HandlerDefault;
+import com.nf.mvc.handler.HandlerDefault;
 import com.nf.mvc.HandlerMapping;
 import com.nf.mvc.MvcContext;
 import com.nf.mvc.annotation.RequestMapping;

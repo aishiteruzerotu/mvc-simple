@@ -1,12 +1,8 @@
 package com.nf.mvc.mapping;
 
 import com.nf.mvc.*;
-import io.github.classgraph.ClassInfo;
-import io.github.classgraph.ClassInfoList;
-import io.github.classgraph.ScanResult;
+import com.nf.mvc.handler.HandlerDefault;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +33,7 @@ public class NameConventionHandlerMapping implements HandlerMapping {
                 if (method==null){
                     continue;
                 }
-                String uri = this.generateHandleUrl( simpleName).toLowerCase(Locale.ROOT);
+                String uri = this.generateHandleUrl( simpleName);
                 HandlerDefault handlerDefault = new HandlerDefault();
                 handlerDefault.setClz(clz);
                 handlerDefault.setMethod(method);
@@ -48,7 +44,7 @@ public class NameConventionHandlerMapping implements HandlerMapping {
     }
 
     private String generateHandleUrl(String simpleName) {
-        return "/" + simpleName.substring(0, simpleName.length() - SUFFIX.length());
+        return ("/" + simpleName.substring(0, simpleName.length() - SUFFIX.length())).toLowerCase(Locale.ROOT);
     }
 
     @Override

@@ -7,10 +7,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-public class DefaultView extends ViewResult {
+public class ToStringViewResult extends ViewResult {
     private Object str;
 
-    public DefaultView(Object str) {
+    public ToStringViewResult(Object str) {
         if (str==null){
             this.str = "";
         }else {
@@ -20,6 +20,7 @@ public class DefaultView extends ViewResult {
 
     @Override
     public void render(HttpServletRequest req, HttpServletResponse resp) throws ServletException,IOException {
+        resp.setContentType("text/html;charset=UTF-8");
         resp.getWriter().write(str.toString());
     }
 }
