@@ -3,20 +3,17 @@ package com.nf.mvc.mapping;
 import com.nf.mvc.Handler;
 import com.nf.mvc.HandlerMapping;
 import com.nf.mvc.MvcContext;
-import com.nf.mvc.annotation.RequestController;
 import com.nf.mvc.annotation.RequestMapping;
 import com.nf.mvc.handler.HandlerDefault;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 public abstract class AbstractHandlerMapping implements HandlerMapping {
     protected Map<String, Handler> handlers = new HashMap<>();
+
     public AbstractHandlerMapping() {
         init();
     }

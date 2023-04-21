@@ -1,13 +1,7 @@
 package com.nf.mvc.mapping;
 
-import com.nf.mvc.*;
-import com.nf.mvc.handler.HandlerDefault;
-
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 /**
  * 依据类的名字来处理映射，
@@ -35,6 +29,7 @@ public class NameConventionHandlerMapping extends AbstractHandlerMapping {
             this.setHandlers(clz,method);
         }
     }
+
     @Override
     protected String getUri(Class<?> clz, Method method) {
         String simpleName = clz.getSimpleName();

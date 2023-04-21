@@ -1,24 +1,11 @@
 package com.nf.mvc.adapters;
 
 import com.nf.mvc.Handler;
-import com.nf.mvc.HandlerAdapter;
-import com.nf.mvc.ViewResult;
 import com.nf.mvc.annotation.RequestMapping;
-import com.nf.mvc.util.CallParametersUtils;
-import com.nf.mvc.util.HandlerInvokeUtils;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-public class MethodRequestMappingHandlerAdapter implements HandlerAdapter {
+public class MethodRequestMappingHandlerAdapter extends AbstractHandlerAdapter {
     @Override
-    public boolean supports(Handler handler) {
-        return handler!=null && handler instanceof Handler && handler.getMethod().isAnnotationPresent(RequestMapping.class);
-    }
-
-    @Override
-    public ViewResult handle(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {
-        Object[] objects = CallParametersUtils.getObjects(req ,resp, handler);
-        return HandlerInvokeUtils.invoke(handler, objects);
+    protected boolean isAssignableFrom(Handler handler) {
+        return handler.getMethod().isAnnotationPresent(RequestMapping.class);
     }
 }
