@@ -1,5 +1,6 @@
 package com.nf.mvc;
 
+import com.nf.mvc.support.OrderComparator;
 import com.nf.mvc.util.ReflectionUtils;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
@@ -62,6 +63,11 @@ public class MvcContext {
 
             allScanedClasses.add(scanedClass);
         }
+
+        this.handlerMappings.sort(new OrderComparator<>());
+        this.handlerAdapters.sort(new OrderComparator<>());
+        this.argumentResolvers.sort(new OrderComparator<>());
+        this.exceptionResolvers.sort(new OrderComparator<>());
     }
 
     private <T> void setList(Class<? extends T> clz,Class<?> scanedClass,List<T> arr){
