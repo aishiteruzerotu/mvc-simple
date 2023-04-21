@@ -6,6 +6,7 @@ import com.nf.mvc.adapters.MethodNameHandlerAdapter;
 import com.nf.mvc.mapping.MethodRequestMappingHandlerMapping;
 import com.nf.mvc.mapping.NameConventionHandlerMapping;
 import com.nf.mvc.mapping.RequestControllerHandlerMapping;
+import com.nf.mvc.support.OrderComparator;
 import com.nf.mvc.util.ScanUtils;
 import io.github.classgraph.ScanResult;
 
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DispatcherServlet extends HttpServlet {
@@ -56,6 +58,8 @@ public class DispatcherServlet extends HttpServlet {
         //mvc框架自身的HandlerMapping优先级更低，后注册
         List<HandlerMapping> defaultHandlerMappings = getDefaultHandlerMappings();
 
+        Collections.sort(customHandlerMappings,new OrderComparator<>());
+
         handlerMappings.addAll(customHandlerMappings);
         handlerMappings.addAll(defaultHandlerMappings);
     }
@@ -78,6 +82,8 @@ public class DispatcherServlet extends HttpServlet {
         List<HandlerAdapter> customHandlerAdapters = getCustomHandlerAdapters();
         //mvc框架自身的HandlerAdapter优先级更低，后注册
         List<HandlerAdapter> defaultHandlerAdapters = getDefaultHandlerAdapters();
+
+        Collections.sort(customHandlerAdapters,new OrderComparator<>());
 
         handlerAdapters.addAll(customHandlerAdapters);
         handlerAdapters.addAll(defaultHandlerAdapters);
