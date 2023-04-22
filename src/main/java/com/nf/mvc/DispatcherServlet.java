@@ -1,11 +1,5 @@
 package com.nf.mvc;
 
-import com.nf.mvc.adapters.MethodRequestMappingHandlerAdapter;
-import com.nf.mvc.adapters.HttpRequestHandlerAdapter;
-import com.nf.mvc.adapters.MethodNameHandlerAdapter;
-import com.nf.mvc.mapping.MethodRequestMappingHandlerMapping;
-import com.nf.mvc.mapping.NameConventionHandlerMapping;
-import com.nf.mvc.mapping.RequestControllerHandlerMapping;
 import com.nf.mvc.util.ScanUtils;
 import io.github.classgraph.ScanResult;
 
@@ -18,6 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 @MultipartConfig
 public class DispatcherServlet extends HttpServlet {
     private static final String COMPONENT_SCAN = "scanPackage";
@@ -25,12 +20,15 @@ public class DispatcherServlet extends HttpServlet {
     protected List<HandlerMapping> handlerMappings = new ArrayList<>();
     protected List<HandlerAdapter> handlerAdapters = new ArrayList<>();
 
+    protected static MvcContext MVC_CONTEXT = MvcContext.getMvcContext();
+
     //region 初始化逻辑
     @Override
     public void init(ServletConfig config) throws ServletException {
         this.initSetScanResult(config);
-        this.initHandlerMappings();
-        this.initHandlerAdapters();
+
+        this.handlerMappings = MVC_CONTEXT.getHandlerMappings();
+        this.handlerAdapters = MVC_CONTEXT.getHandlerAdapters();
     }
 
     protected void initSetScanResult(ServletConfig config) {
@@ -49,52 +47,6 @@ public class DispatcherServlet extends HttpServlet {
 
     private void initMvcContext(ScanResult scanResult) {
         MvcContext.getMvcContext().config(scanResult);
-    }
-
-    private void initHandlerMappings() {
-        //优先添加用户自定义的HandlerMapping
-        List<HandlerMapping> customHandlerMappings = getCustomHandlerMappings();
-        //mvc框架自身的HandlerMapping优先级更低，后注册
-        List<HandlerMapping> defaultHandlerMappings = getDefaultHandlerMappings();
-
-        handlerMappings.addAll(customHandlerMappings);
-        handlerMappings.addAll(defaultHandlerMappings);
-    }
-
-    protected List<HandlerMapping> getCustomHandlerMappings() {
-        return MvcContext.getMvcContext().getHandlerMappings();
-    }
-
-    protected List<HandlerMapping> getDefaultHandlerMappings() {
-        List<HandlerMapping> mappings = new ArrayList<>();
-        mappings.add(new RequestControllerHandlerMapping());
-        mappings.add(new MethodRequestMappingHandlerMapping());
-        mappings.add(new NameConventionHandlerMapping());
-        return mappings;
-    }
-
-    private void initHandlerAdapters() {
-
-        //优先添加用户自定义的HandlerAdapter
-        List<HandlerAdapter> customHandlerAdapters = getCustomHandlerAdapters();
-        //mvc框架自身的HandlerAdapter优先级更低，后注册
-        List<HandlerAdapter> defaultHandlerAdapters = getDefaultHandlerAdapters();
-
-        handlerAdapters.addAll(customHandlerAdapters);
-        handlerAdapters.addAll(defaultHandlerAdapters);
-
-    }
-
-    protected List<HandlerAdapter> getCustomHandlerAdapters() {
-        return MvcContext.getMvcContext().getHandlerAdapters();
-    }
-
-    protected List<HandlerAdapter> getDefaultHandlerAdapters() {
-        List<HandlerAdapter> adapters = new ArrayList<>();
-        adapters.add(new MethodRequestMappingHandlerAdapter());
-        adapters.add(new HttpRequestHandlerAdapter());
-        adapters.add(new MethodNameHandlerAdapter());
-        return adapters;
     }
     //endregion
 

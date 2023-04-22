@@ -1,5 +1,11 @@
 package com.nf.mvc;
 
+import com.nf.mvc.adapters.HttpRequestHandlerAdapter;
+import com.nf.mvc.adapters.MethodNameHandlerAdapter;
+import com.nf.mvc.adapters.MethodRequestMappingHandlerAdapter;
+import com.nf.mvc.mapping.MethodRequestMappingHandlerMapping;
+import com.nf.mvc.mapping.NameConventionHandlerMapping;
+import com.nf.mvc.mapping.RequestControllerHandlerMapping;
 import com.nf.mvc.support.OrderComparator;
 import com.nf.mvc.util.ReflectionUtils;
 import io.github.classgraph.ClassInfo;
@@ -14,18 +20,36 @@ public class MvcContext {
 
     private static final MvcContext instance = new MvcContext();
 
+    private static final OrderComparator ORDER_COMPARATOR = new OrderComparator<>();
+
     private ScanResult scanResult;
 
+    //region 声明
+    //声明所有配置
     private List<HandlerMapping> handlerMappings = new ArrayList<>();
     private List<HandlerAdapter> handlerAdapters = new ArrayList<>();
     private List<MethodArgumentResolver> argumentResolvers = new ArrayList<>();
     private List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
 
+    // 扫描到的所有的类
     private List<Class<?>> allScanedClasses = new ArrayList<>();
+
+    //用户定义实现类
+    private List<HandlerMapping> customHandlerMappings = new ArrayList<>();
+    private List<HandlerAdapter> customHandlerAdapters = new ArrayList<>();
+    private List<MethodArgumentResolver> customArgumentResolvers = new ArrayList<>();
+    private List<HandlerExceptionResolver> customExceptionResolvers = new ArrayList<>();
+
+    //自身框架提供实现类
+    private List<HandlerMapping> defaultHandlerMappings = new ArrayList<>();
+    private List<HandlerAdapter> defaultHandlerAdapters = new ArrayList<>();
+    private List<MethodArgumentResolver> defaultArgumentResolvers = new ArrayList<>();
+    private List<HandlerExceptionResolver> defaultExceptionResolvers = new ArrayList<>();
+    //endregion
 
     private MvcContext(){}
 
-
+    //region 初始化
     public static MvcContext getMvcContext(){
         return instance;
     }
@@ -56,18 +80,31 @@ public class MvcContext {
         for (ClassInfo classInfo : allClasses) {
             Class<?> scanedClass = classInfo.loadClass();
 
-            this.setList(HandlerMapping.class,scanedClass,this.handlerMappings);
-            this.setList(HandlerAdapter.class,scanedClass,this.handlerAdapters);
-            this.setList(MethodArgumentResolver.class,scanedClass,this.argumentResolvers);
-            this.setList(HandlerExceptionResolver.class,scanedClass,this.exceptionResolvers);
+            this.setList(HandlerMapping.class,scanedClass,this.customHandlerMappings);
+            this.setList(HandlerAdapter.class,scanedClass,this.customHandlerAdapters);
+            this.setList(MethodArgumentResolver.class,scanedClass,this.customArgumentResolvers);
+            this.setList(HandlerExceptionResolver.class,scanedClass,this.customExceptionResolvers);
 
             allScanedClasses.add(scanedClass);
         }
 
-        this.handlerMappings.sort(new OrderComparator<>());
-        this.handlerAdapters.sort(new OrderComparator<>());
-        this.argumentResolvers.sort(new OrderComparator<>());
-        this.exceptionResolvers.sort(new OrderComparator<>());
+        //排序操作
+        this.customHandlerMappings.sort(ORDER_COMPARATOR);
+        this.customHandlerAdapters.sort(ORDER_COMPARATOR);
+        this.customArgumentResolvers.sort(ORDER_COMPARATOR);
+        this.customExceptionResolvers.sort(ORDER_COMPARATOR);
+
+        // 配置用户实现类
+        this.handlerMappings.addAll(this.customHandlerMappings);
+        this.handlerAdapters.addAll(this.customHandlerAdapters);
+        this.argumentResolvers.addAll(this.customArgumentResolvers);
+        this.exceptionResolvers.addAll(this.customExceptionResolvers);
+
+        // 配置默认实现类
+        this.handlerMappings.addAll(this.getDefaultHandlerMappings());
+        this.handlerAdapters.addAll(this.getDefaultHandlerAdapters());
+        this.argumentResolvers.addAll(this.getDefaultArgumentResolvers());
+        this.exceptionResolvers.addAll(this.getDefaultExceptionResolvers());
     }
 
     private <T> void setList(Class<? extends T> clz,Class<?> scanedClass,List<T> arr){
@@ -80,7 +117,9 @@ public class MvcContext {
     ScanResult getScanResult(){
         return  this.scanResult;
     }
+    //endregion
 
+    //region 返回所有的实现类
     /**
      * 因为我们解析之后，结果就是固定的，如果直接返回List
      * 用户是可以改这个集合里面的内容，所以返回一个只读集合
@@ -88,23 +127,66 @@ public class MvcContext {
      * @return
      */
     public List<HandlerMapping> getHandlerMappings() {
-        return Collections.unmodifiableList(handlerMappings);
+        return Collections.unmodifiableList(this.handlerMappings);
     }
 
     public List<HandlerAdapter> getHandlerAdapters(){
-        return Collections.unmodifiableList(handlerAdapters);
+        return Collections.unmodifiableList(this.handlerAdapters);
     }
 
     public List<MethodArgumentResolver> getArgumentResolvers(){
-        return Collections.unmodifiableList(argumentResolvers);
+        return Collections.unmodifiableList(this.argumentResolvers);
     }
 
     public List<HandlerExceptionResolver> getExceptionResolvers(){
-        return Collections.unmodifiableList(exceptionResolvers);
+        return Collections.unmodifiableList(this.exceptionResolvers);
     }
 
     public List<Class<?>> getAllScanedClasses(){
-        return Collections.unmodifiableList(allScanedClasses);
+        return Collections.unmodifiableList(this.allScanedClasses);
     }
+    //endregion
+
+    //region 返回用户提供的实现类
+    public List<HandlerMapping> getCustomHandlerMappings() {
+        return Collections.unmodifiableList(this.customHandlerMappings);
+    }
+
+    public List<HandlerAdapter> getCustomHandlerAdapters() {
+        return Collections.unmodifiableList(this.customHandlerAdapters);
+    }
+
+    public List<MethodArgumentResolver> getCustomArgumentResolvers() {
+        return Collections.unmodifiableList(this.customArgumentResolvers);
+    }
+
+    public List<HandlerExceptionResolver> getCustomExceptionResolvers() {
+        return Collections.unmodifiableList(this.customExceptionResolvers);
+    }
+    //endregion
+
+    //region 返回默认实现类
+    public List<HandlerMapping> getDefaultHandlerMappings() {
+        this.defaultHandlerMappings.add(new RequestControllerHandlerMapping());
+        this.defaultHandlerMappings.add(new MethodRequestMappingHandlerMapping());
+        this.defaultHandlerMappings.add(new NameConventionHandlerMapping());
+        return Collections.unmodifiableList(this.defaultHandlerMappings);
+    }
+
+    public List<HandlerAdapter> getDefaultHandlerAdapters() {
+        this.defaultHandlerAdapters.add(new MethodRequestMappingHandlerAdapter());
+        this.defaultHandlerAdapters.add(new HttpRequestHandlerAdapter());
+        this.defaultHandlerAdapters.add(new MethodNameHandlerAdapter());
+        return Collections.unmodifiableList(this.defaultHandlerAdapters);
+    }
+
+    public List<MethodArgumentResolver> getDefaultArgumentResolvers() {
+        return Collections.unmodifiableList(this.defaultArgumentResolvers);
+    }
+
+    public List<HandlerExceptionResolver> getDefaultExceptionResolvers() {
+        return Collections.unmodifiableList(this.defaultExceptionResolvers);
+    }
+    //endregion
 }
 
