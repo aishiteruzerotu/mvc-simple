@@ -11,13 +11,14 @@ import io.github.classgraph.ScanResult;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
+@MultipartConfig
 public class DispatcherServlet extends HttpServlet {
     private static final String COMPONENT_SCAN = "scanPackage";
 
@@ -100,6 +101,7 @@ public class DispatcherServlet extends HttpServlet {
     //region 调用逻辑
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        req.setCharacterEncoding("UTF-8");//设置中文请求
         String uri = this.getUri(req);
         try {
             Handler handler = this.getHandlerMapping(uri);
