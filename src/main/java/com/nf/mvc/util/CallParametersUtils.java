@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class CallParametersUtils {
@@ -57,17 +56,17 @@ public class CallParametersUtils {
             } else {
                 value = req.getParameter(key);
             }
-            Object object = getObject(parameter, value);
+            Object object = convert(parameter, value);
             objects[i] = object;
         }
-        //TODO: 类型转化的问题，暂时先不解决
+
         return objects;
     }
 
-    public static Object getObject(Parameter parameter, Object obj){
+    public static Object convert(Parameter parameter, Object obj){
         for (ParameterProcessor parameterProcessor : parameterProcessorList) {
             if (parameterProcessor.supports(parameter)) {
-                return parameterProcessor.getObject(obj);
+                return parameterProcessor.convert(obj);
             }
         }
         return obj;
