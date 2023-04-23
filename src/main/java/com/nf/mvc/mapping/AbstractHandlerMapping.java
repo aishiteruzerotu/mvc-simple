@@ -19,7 +19,7 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
     }
 
     public Handler getHandler(String uri) {
-        return handlers.get(uri);
+        return this.handlers.get(uri);
     }
 
     protected void init() {
@@ -42,7 +42,22 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
     protected void setHandlers(Class<?> clz, Method method) {
         String uri = getUri(clz, method);
         Handler handler = getHandler(clz, method);
-        handlers.put(uri,handler);
+        this.isNullURIMapping(clz, method, uri);
+        this.handlers.put(uri, handler);
+    }
+
+    /**
+     * 判断 URI 是否有重复值，没有返回真，有抛出异常
+     * @param clz 类对象
+     * @param method 方法对象
+     * @param uri 请求映射
+     * @return 真
+     */
+    protected boolean isNullURIMapping(Class<?> clz, Method method, String uri) {
+        if (this.handlers.get(uri)!=null) {
+            throw new RuntimeException("不能出现重复的映射， " + clz + " 的 " + method.getName() + " 方法的 " + uri + " 映射重复");
+        }
+        return true;
     }
 
     protected Handler getHandler(Class<?> clz, Method method) {
