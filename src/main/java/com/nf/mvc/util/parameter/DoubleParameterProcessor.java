@@ -4,7 +4,7 @@ import com.nf.mvc.util.AbstractParameterProcessor;
 
 import java.util.Arrays;
 
-public class DoubleParameterProcessor extends AbstractParameterProcessor<Double,Double[]> {
+public class DoubleParameterProcessor extends AbstractParameterProcessor<Double> {
     @Override
     protected Class<? extends Double> getType() {
         return Double.class;

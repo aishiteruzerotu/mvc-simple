@@ -4,7 +4,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Parameter;
 import java.util.Arrays;
 
-public abstract class AbstractParameterProcessor<T,A>  implements ParameterProcessor {
+public abstract class AbstractParameterProcessor<T>  implements ParameterProcessor {
 
     protected Class<?> parameterType;
 
@@ -17,7 +17,7 @@ public abstract class AbstractParameterProcessor<T,A>  implements ParameterProce
 
     protected abstract Class<? extends T> getType();
 
-    protected abstract Class<? extends A> getArrayType();
+    protected abstract Class<? extends T[]> getArrayType();
 
     protected abstract boolean basicType();
 

@@ -4,7 +4,7 @@ import com.nf.mvc.util.AbstractParameterProcessor;
 
 import java.util.Arrays;
 
-public class LongParameterProcessor extends AbstractParameterProcessor<Long,Long[]> {
+public class LongParameterProcessor extends AbstractParameterProcessor<Long> {
     @Override
     protected Class<? extends Long> getType() {
         return Long.class;

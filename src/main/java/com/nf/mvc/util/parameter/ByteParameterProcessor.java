@@ -2,7 +2,7 @@ package com.nf.mvc.util.parameter;
 
 import com.nf.mvc.util.AbstractParameterProcessor;
 
-public class ByteParameterProcessor extends AbstractParameterProcessor<Byte,Byte[]> {
+public class ByteParameterProcessor extends AbstractParameterProcessor<Byte> {
     @Override
     protected Class<? extends Byte> getType() {
         return Byte.class;

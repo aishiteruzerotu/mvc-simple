@@ -2,7 +2,7 @@ package com.nf.mvc.util.parameter;
 
 import com.nf.mvc.util.AbstractParameterProcessor;
 
-public class BooleanParameterProcessor extends AbstractParameterProcessor<Boolean,Boolean[]> {
+public class BooleanParameterProcessor extends AbstractParameterProcessor<Boolean> {
     @Override
     protected Class<? extends Boolean> getType() {
         return Boolean.class;

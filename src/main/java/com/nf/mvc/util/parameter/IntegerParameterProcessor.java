@@ -4,7 +4,7 @@ import com.nf.mvc.util.AbstractParameterProcessor;
 
 import java.util.Arrays;
 
-public class IntegerParameterProcessor extends AbstractParameterProcessor<Integer,Integer[]> {
+public class IntegerParameterProcessor extends AbstractParameterProcessor<Integer> {
     @Override
     protected Class<? extends Integer> getType() {
         return Integer.class;

@@ -67,11 +67,20 @@ public class DispatcherServlet extends HttpServlet {
 
     protected void doService(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {
         if (handler == null) {
-            resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+            this.noHandlerFound(req,resp);
             return;
         }
         ViewResult viewResult = this.getHandlerAdapter(req, resp, handler);
         this.render(req, resp, viewResult);
+    }
+
+    protected void noHandlerFound(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        //resp.sendError(HttpServletResponse.SC_NOT_FOUND);
+        //我们获取容器中本来就有的默认servlet来处理静态资源
+        //容器中默认servlet是有能力处理静态资源
+        //默认servlet的名字，在很多容器中就是叫default，但有些容器不叫default
+        //常用的tomcat，jetty这些容器中就是叫default
+        req.getServletContext().getNamedDispatcher("default").forward(req,resp);
     }
 
     private void render(HttpServletRequest req, HttpServletResponse resp, ViewResult viewResult) throws ServletException, IOException {
