@@ -49,7 +49,7 @@ public class CallParametersUtils {
             if (parameter.isAnnotationPresent(RequestParam.class)) {
                 key = parameter.getAnnotation(RequestParam.class).value();
             } else {
-                key = getName(handler,i);
+                key = handler.getParamName(parameter);
             }
             if (parameter.getType().isArray()) {
                 value = req.getParameterValues(key);
@@ -70,20 +70,6 @@ public class CallParametersUtils {
             }
         }
         return obj;
-    }
-
-    private static String getName(Handler handler,int index){
-        List<String> paramNames = getParamNames(handler);
-        return paramNames.get(index);
-    }
-
-    private static List<String> getParamNames(Handler handler) {
-        Parameter[] parameters = handler.getParameters();
-        Class[] classes = new Class[parameters.length];
-        for (int i = 0; i < classes.length; i++) {
-            classes[i] = parameters[i].getType();
-        }
-        return getParamNames(handler.getClz(), handler.getMethod().getName(), classes);
     }
 
     /**
