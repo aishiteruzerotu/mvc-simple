@@ -2,6 +2,7 @@ package com.nf.mvc.util;
 
 import com.nf.mvc.*;
 import com.nf.mvc.annotation.RequestParam;
+import com.nf.mvc.support.OrderComparator;
 import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
@@ -31,6 +32,7 @@ public class CallParametersUtils {
                 parameterProcessorList.add(exceptionResolver);
             }
         }
+        parameterProcessorList.sort(new OrderComparator<>());
     }
 
     public static Object[] getObjects(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws ServletException, IOException {

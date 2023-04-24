@@ -1,4 +1,4 @@
-package com.nf.mvc.util.parameter;
+package com.nf.mvc.util.parameter.basic;
 
 import com.nf.mvc.util.AbstractParameterProcessor;
 
@@ -20,7 +20,7 @@ public class IntegerParameterProcessor extends AbstractParameterProcessor<Intege
         return this.parameterType.equals(int.class) || this.parameterType.equals(int[].class);
     }
 
-
+    @Override
     protected Object getConvert(Object obj) {
         if(this.parameterType.equals(this.getArrayType())){
             return (Integer) Integer.valueOf(obj.toString());
@@ -28,6 +28,7 @@ public class IntegerParameterProcessor extends AbstractParameterProcessor<Intege
         return Integer.parseInt(obj.toString());
     }
 
+    @Override
     protected Object getConverts(String[] strings) {
         int[] ints = Arrays.stream(strings).mapToInt(Integer::parseInt).toArray();
         if (this.parameterType.equals(this.getArrayType())){

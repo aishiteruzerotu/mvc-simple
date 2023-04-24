@@ -1,4 +1,4 @@
-package com.nf.mvc.util.parameter;
+package com.nf.mvc.util.parameter.basic;
 
 import com.nf.mvc.util.AbstractParameterProcessor;
 
