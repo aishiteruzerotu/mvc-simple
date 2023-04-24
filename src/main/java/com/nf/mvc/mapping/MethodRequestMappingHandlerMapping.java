@@ -5,6 +5,12 @@ import com.nf.mvc.annotation.RequestMapping;
 import java.lang.reflect.Method;
 import java.util.Locale;
 
+/**
+ * 不推荐使用该类，应该使用 com.nf.mvc.mapping.RequestControllerHandlerMapping 类
+ * 该类只针对 方法
+ * 而 RequestControllerHandlerMapping 类可以同时应用 类和方法
+ */
+@Deprecated
 public class MethodRequestMappingHandlerMapping extends AbstractHandlerMapping {
     public MethodRequestMappingHandlerMapping() {
     }

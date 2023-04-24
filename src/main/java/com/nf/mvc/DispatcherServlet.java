@@ -108,7 +108,7 @@ public class DispatcherServlet extends HttpServlet {
                 return adapter.handle(req, resp, handler);
             }
         }
-        return null;
+        throw new ServletException("此Handler没有对应的adapter去处理，请在DispatcherServlet中进行额外的配置");
     }
     //endregion
 }
