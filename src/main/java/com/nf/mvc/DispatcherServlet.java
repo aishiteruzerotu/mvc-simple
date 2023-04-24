@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +54,7 @@ public class DispatcherServlet extends HttpServlet {
     //region 调用逻辑
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setCharacterEncoding("UTF-8");//设置中文请求
+        this.setEncoding(req,resp);
         String uri = this.getUri(req);
         try {
             Handler handler = this.getHandlerMapping(uri);
@@ -63,6 +64,18 @@ public class DispatcherServlet extends HttpServlet {
         } catch (Exception ex) {
             System.out.println("yichang dispatcher------");
         }
+    }
+
+    /**
+     * 设置编码的方法是在service方法里面第一个调用，如果已经从req
+     * 对象中获取数据了，再设置这个编码是无效
+     * @param req 请求
+     * @param resp 响应
+     * @throws IOException 数据无效异常
+     */
+    protected void setEncoding(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        req.setCharacterEncoding("UTF-8");
+        resp.setCharacterEncoding("UTF-8");
     }
 
     protected void doService(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {
