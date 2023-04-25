@@ -29,7 +29,7 @@ public class MvcContext {
     //声明所有配置
     private List<HandlerMapping> handlerMappings = new ArrayList<>();
     private List<HandlerAdapter> handlerAdapters = new ArrayList<>();
-    private List<ParameterProcessor> argumentResolvers = new ArrayList<>();
+    private List<ParameterProcessor> parameterProcessors = new ArrayList<>();
     private List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
 
     // 扫描到的所有的类
@@ -38,13 +38,13 @@ public class MvcContext {
     //用户定义实现类
     private List<HandlerMapping> customHandlerMappings = new ArrayList<>();
     private List<HandlerAdapter> customHandlerAdapters = new ArrayList<>();
-    private List<ParameterProcessor> customArgumentResolvers = new ArrayList<>();
+    private List<ParameterProcessor> customParameterProcessors = new ArrayList<>();
     private List<HandlerExceptionResolver> customExceptionResolvers = new ArrayList<>();
 
     //自身框架提供实现类
     private List<HandlerMapping> defaultHandlerMappings = new ArrayList<>();
     private List<HandlerAdapter> defaultHandlerAdapters = new ArrayList<>();
-    private List<ParameterProcessor> defaultArgumentResolvers = new ArrayList<>();
+    private List<ParameterProcessor> defaultParameterProcessors = new ArrayList<>();
     private List<HandlerExceptionResolver> defaultExceptionResolvers = new ArrayList<>();
     //endregion
 
@@ -83,7 +83,7 @@ public class MvcContext {
 
             this.setList(HandlerMapping.class,scanedClass,this.customHandlerMappings);
             this.setList(HandlerAdapter.class,scanedClass,this.customHandlerAdapters);
-            this.setList(ParameterProcessor.class,scanedClass,this.customArgumentResolvers);
+            this.setList(ParameterProcessor.class,scanedClass,this.customParameterProcessors);
             this.setList(HandlerExceptionResolver.class,scanedClass,this.customExceptionResolvers);
 
             allScanedClasses.add(scanedClass);
@@ -92,20 +92,8 @@ public class MvcContext {
         //排序操作
         this.customHandlerMappings.sort(ORDER_COMPARATOR);
         this.customHandlerAdapters.sort(ORDER_COMPARATOR);
-        this.customArgumentResolvers.sort(ORDER_COMPARATOR);
+        this.customParameterProcessors.sort(ORDER_COMPARATOR);
         this.customExceptionResolvers.sort(ORDER_COMPARATOR);
-
-        // 配置用户实现类
-        this.handlerMappings.addAll(this.customHandlerMappings);
-        this.handlerAdapters.addAll(this.customHandlerAdapters);
-        this.argumentResolvers.addAll(this.customArgumentResolvers);
-        this.exceptionResolvers.addAll(this.customExceptionResolvers);
-
-        // 配置默认实现类
-        this.handlerMappings.addAll(this.getDefaultHandlerMappings());
-        this.handlerAdapters.addAll(this.getDefaultHandlerAdapters());
-        this.argumentResolvers.addAll(this.getDefaultArgumentResolvers());
-        this.exceptionResolvers.addAll(this.getDefaultExceptionResolvers());
     }
 
     private <T> void setList(Class<? extends T> clz,Class<?> scanedClass,List<T> arr){
@@ -118,6 +106,23 @@ public class MvcContext {
     ScanResult getScanResult(){
         return  this.scanResult;
     }
+
+    void setHandlerMappings(List<HandlerMapping> handlerMappings) {
+        this.handlerMappings = handlerMappings;
+    }
+
+    void setHandlerAdapters(List<HandlerAdapter> handlerAdapters) {
+        this.handlerAdapters = handlerAdapters;
+    }
+
+    void setParameterProcessors(List<ParameterProcessor> parameterProcessors) {
+        this.parameterProcessors = parameterProcessors;
+    }
+
+    void setExceptionResolvers(List<HandlerExceptionResolver> exceptionResolvers) {
+        this.exceptionResolvers = exceptionResolvers;
+    }
+
     //endregion
 
     //region 返回所有的实现类
@@ -135,8 +140,8 @@ public class MvcContext {
         return Collections.unmodifiableList(this.handlerAdapters);
     }
 
-    public List<ParameterProcessor> getArgumentResolvers(){
-        return Collections.unmodifiableList(this.argumentResolvers);
+    public List<ParameterProcessor> getParameterProcessors(){
+        return Collections.unmodifiableList(this.parameterProcessors);
     }
 
     public List<HandlerExceptionResolver> getExceptionResolvers(){
@@ -157,8 +162,8 @@ public class MvcContext {
         return Collections.unmodifiableList(this.customHandlerAdapters);
     }
 
-    public List<ParameterProcessor> getCustomArgumentResolvers() {
-        return Collections.unmodifiableList(this.customArgumentResolvers);
+    public List<ParameterProcessor> getCustomParameterProcessors() {
+        return Collections.unmodifiableList(this.customParameterProcessors);
     }
 
     public List<HandlerExceptionResolver> getCustomExceptionResolvers() {
@@ -169,8 +174,8 @@ public class MvcContext {
     //region 返回默认实现类
     public List<HandlerMapping> getDefaultHandlerMappings() {
         this.defaultHandlerMappings.add(new RequestControllerHandlerMapping());
-        this.defaultHandlerMappings.add(new MethodRequestMappingHandlerMapping());
         this.defaultHandlerMappings.add(new NameConventionHandlerMapping());
+        this.defaultHandlerMappings.add(new MethodRequestMappingHandlerMapping());
         return Collections.unmodifiableList(this.defaultHandlerMappings);
     }
 
@@ -181,18 +186,18 @@ public class MvcContext {
         return Collections.unmodifiableList(this.defaultHandlerAdapters);
     }
 
-    public List<ParameterProcessor> getDefaultArgumentResolvers() {
+    public List<ParameterProcessor> getDefaultParameterProcessors() {
         ScanResult scanResult = ScanUtils.scan("com.nf.mvc.parameter");
         ClassInfoList allClasses = scanResult.getAllClasses();
         for (ClassInfo classInfo : allClasses) {
             Class<?> scanedClass = classInfo.loadClass();
             if (scanedClass.isAssignableFrom(scanedClass)) {
                 ParameterProcessor exceptionResolver = (ParameterProcessor) ReflectionUtils.newInstance(scanedClass);
-                this.defaultArgumentResolvers.add(exceptionResolver);
+                this.defaultParameterProcessors.add(exceptionResolver);
             }
         }
-        this.defaultArgumentResolvers.sort(new OrderComparator<>());
-        return Collections.unmodifiableList(this.defaultArgumentResolvers);
+        this.defaultParameterProcessors.sort(new OrderComparator<>());
+        return Collections.unmodifiableList(this.defaultParameterProcessors);
     }
 
     public List<HandlerExceptionResolver> getDefaultExceptionResolvers() {

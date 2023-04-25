@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +19,7 @@ public class DispatcherServlet extends HttpServlet {
 
     protected List<HandlerMapping> handlerMappings = new ArrayList<>();
     protected List<HandlerAdapter> handlerAdapters = new ArrayList<>();
+    protected List<ParameterProcessor> parameterProcessors = new ArrayList<>();
 
     protected static MvcContext MVC_CONTEXT = MvcContext.getMvcContext();
 
@@ -28,8 +28,9 @@ public class DispatcherServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         this.initSetScanResult(config);
 
-        this.handlerMappings = MVC_CONTEXT.getHandlerMappings();
-        this.handlerAdapters = MVC_CONTEXT.getHandlerAdapters();
+        this.initParameterProcessors();
+        this.initHandlerMappings();
+        this.initHandlerAdapters();
     }
 
     protected void initSetScanResult(ServletConfig config) {
@@ -49,12 +50,71 @@ public class DispatcherServlet extends HttpServlet {
     private void initMvcContext(ScanResult scanResult) {
         MvcContext.getMvcContext().config(scanResult);
     }
+
+    private void initHandlerMappings() {
+        //优先添加用户自定义的HandlerMapping
+        List<HandlerMapping> customHandlerMappings = this.getCustomHandlerMappings();
+        //mvc框架自身的HandlerMapping优先级更低，后注册
+        List<HandlerMapping> defaultHandlerMappings = this.getDefaultHandlerMappings();
+
+        this.handlerMappings.addAll(customHandlerMappings);
+        this.handlerMappings.addAll(defaultHandlerMappings);
+        MVC_CONTEXT.setHandlerMappings(this.handlerMappings);
+    }
+
+    protected List<HandlerMapping> getDefaultHandlerMappings() {
+        return MVC_CONTEXT.getDefaultHandlerMappings();
+    }
+
+    protected List<HandlerMapping> getCustomHandlerMappings() {
+        return MVC_CONTEXT.getCustomHandlerMappings();
+    }
+
+    private void initHandlerAdapters() {
+        //优先添加用户自定义的HandlerAdapter
+        List<HandlerAdapter> customHandlerAdapters = this.getCustomHandlerAdapters();
+        //mvc框架自身的HandlerAdapter优先级更低，后注册
+        List<HandlerAdapter> defaultHandlerAdapters = this.getDefaultHandlerAdapters();
+
+        this.handlerAdapters.addAll(customHandlerAdapters);
+        this.handlerAdapters.addAll(defaultHandlerAdapters);
+        MVC_CONTEXT.setHandlerAdapters(this.handlerAdapters);
+    }
+
+    private List<HandlerAdapter> getDefaultHandlerAdapters() {
+        return MVC_CONTEXT.getDefaultHandlerAdapters();
+    }
+
+    private List<HandlerAdapter> getCustomHandlerAdapters() {
+        return MVC_CONTEXT.getCustomHandlerAdapters();
+    }
+
+    private void initParameterProcessors(){
+
+        List<ParameterProcessor> customArgumentResolvers = this.getCustomParameterProcessors();
+
+        List<ParameterProcessor> defaultArgumentResolvers = this.getDefaultParameterProcessors();
+
+        this.parameterProcessors.addAll(customArgumentResolvers);
+        this.parameterProcessors.addAll(defaultArgumentResolvers);
+        //把定制+默认的所有HandlerMapping组件添加到上下文中
+        MVC_CONTEXT.setParameterProcessors(this.parameterProcessors);
+    }
+
+    protected List<ParameterProcessor> getDefaultParameterProcessors() {
+        return MVC_CONTEXT.getDefaultParameterProcessors();
+    }
+
+    protected List<ParameterProcessor> getCustomParameterProcessors() {
+        return MVC_CONTEXT.getCustomParameterProcessors();
+    }
+
     //endregion
 
     //region 调用逻辑
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        this.setEncoding(req,resp);
+        this.setEncoding(req, resp);
         String uri = this.getUri(req);
         try {
             Handler handler = this.getHandlerMapping(uri);
@@ -69,7 +129,8 @@ public class DispatcherServlet extends HttpServlet {
     /**
      * 设置编码的方法是在service方法里面第一个调用，如果已经从req
      * 对象中获取数据了，再设置这个编码是无效
-     * @param req 请求
+     *
+     * @param req  请求
      * @param resp 响应
      * @throws IOException 数据无效异常
      */
@@ -80,7 +141,7 @@ public class DispatcherServlet extends HttpServlet {
 
     protected void doService(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {
         if (handler == null) {
-            this.noHandlerFound(req,resp);
+            this.noHandlerFound(req, resp);
             return;
         }
         ViewResult viewResult = this.getHandlerAdapter(req, resp, handler);
@@ -93,7 +154,7 @@ public class DispatcherServlet extends HttpServlet {
         //容器中默认servlet是有能力处理静态资源
         //默认servlet的名字，在很多容器中就是叫default，但有些容器不叫default
         //常用的tomcat，jetty这些容器中就是叫default
-        req.getServletContext().getNamedDispatcher("default").forward(req,resp);
+        req.getServletContext().getNamedDispatcher("default").forward(req, resp);
     }
 
     private void render(HttpServletRequest req, HttpServletResponse resp, ViewResult viewResult) throws ServletException, IOException {

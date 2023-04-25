@@ -16,7 +16,7 @@ import java.util.List;
 
 public class CallParametersUtils {
     private CallParametersUtils(){}
-    private static List<ParameterProcessor> parameterProcessorList = MvcContext.getMvcContext().getArgumentResolvers();
+    private static List<ParameterProcessor> parameterProcessorList = MvcContext.getMvcContext().getParameterProcessors();
 
     public static Object[] getObjects(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws ServletException, IOException {
         Parameter[] parameters = handler.getParameters();
