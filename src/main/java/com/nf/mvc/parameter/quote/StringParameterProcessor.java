@@ -24,8 +24,8 @@ public class StringParameterProcessor extends AbstractParameterProcessor<String>
     }
 
     @Override
-    protected Object getConvert(Object obj) {
-        return obj;
+    protected Object getConvert(String str) {
+        return str;
     }
 
     @Override

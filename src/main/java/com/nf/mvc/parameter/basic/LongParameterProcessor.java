@@ -21,11 +21,11 @@ public class LongParameterProcessor extends AbstractParameterProcessor<Long> {
     }
 
     @Override
-    protected Object getConvert(Object obj) {
+    protected Object getConvert(String str) {
         if(this.parameterType.equals(this.getType())){
-            return (Long) Long.valueOf(obj.toString());
+            return (Long) Long.valueOf(str);
         }
-        return Long.parseLong(obj.toString());
+        return Long.parseLong(str);
     }
 
     @Override

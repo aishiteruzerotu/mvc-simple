@@ -19,11 +19,11 @@ public class ShortParameterProcessor extends AbstractParameterProcessor<Short> {
     }
 
     @Override
-    protected Object getConvert(Object obj) {
+    protected Object getConvert(String str) {
         if(this.parameterType.equals(this.getArrayType())){
-            return (Short) Short.valueOf(obj.toString());
+            return (Short) Short.valueOf(str);
         }
-        return Short.parseShort(obj.toString());
+        return Short.parseShort(str);
     }
 
     @Override

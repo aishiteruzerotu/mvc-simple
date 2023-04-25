@@ -19,11 +19,11 @@ public class ByteParameterProcessor extends AbstractParameterProcessor<Byte> {
     }
 
     @Override
-    protected Object getConvert(Object obj) {
+    protected Object getConvert(String str) {
         if(this.parameterType.equals(this.getType())){
-            return (Byte) Byte.valueOf(obj.toString());
+            return (Byte) Byte.valueOf(str);
         }
-        return Byte.parseByte(obj.toString());
+        return Byte.parseByte(str);
     }
 
     @Override

@@ -19,11 +19,11 @@ public class BooleanParameterProcessor extends AbstractParameterProcessor<Boolea
     }
 
     @Override
-    protected Object getConvert(Object obj) {
+    protected Object getConvert(String str) {
         if(this.parameterType.equals(this.getType())){
-            return (Boolean) Boolean.valueOf(obj.toString());
+            return (Boolean) Boolean.valueOf(str);
         }
-        return Boolean.parseBoolean(obj.toString());
+        return Boolean.parseBoolean(str);
     }
 
     @Override

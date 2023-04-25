@@ -19,8 +19,8 @@ public class CharParameterProcessor extends AbstractParameterProcessor<Character
     }
 
     @Override
-    protected Object getConvert(Object obj) {
-        char c = obj.toString().charAt(obj.toString().length());
+    protected Object getConvert(String str) {
+        char c = str.charAt(str.length());
         if(this.parameterType.equals(this.getArrayType())){
             return (Character) c;
         }

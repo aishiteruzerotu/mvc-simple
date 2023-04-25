@@ -21,11 +21,11 @@ public class IntegerParameterProcessor extends AbstractParameterProcessor<Intege
     }
 
     @Override
-    protected Object getConvert(Object obj) {
+    protected Object getConvert(String str) {
         if(this.parameterType.equals(this.getArrayType())){
-            return (Integer) Integer.valueOf(obj.toString());
+            return (Integer) Integer.valueOf(str);
         }
-        return Integer.parseInt(obj.toString());
+        return Integer.parseInt(str);
     }
 
     @Override

@@ -1,7 +1,7 @@
 package com.nf.mvc.handler;
 
 import com.nf.mvc.Handler;
-import com.nf.mvc.util.CallParametersUtils;
+import com.nf.mvc.util.ReflectionUtils;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class HandlerDefault extends Handler {
             return;
         }
 
-        List<String> paramNames = CallParametersUtils.getParamNames(this.getClz(),
+        List<String> paramNames = ReflectionUtils.getParamNames(this.getClz(),
                 this.getMethod().getName(), this.getParamType());
         for (int i = 0; i < this.parameters.length; i++) {
             if (paramNames!=null)
@@ -30,6 +30,4 @@ public class HandlerDefault extends Handler {
         }
         return classes;
     }
-
-
 }

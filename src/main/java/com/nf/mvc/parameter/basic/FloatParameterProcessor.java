@@ -19,11 +19,11 @@ public class FloatParameterProcessor extends AbstractParameterProcessor<Float> {
     }
 
     @Override
-    protected Object getConvert(Object obj) {
+    protected Object getConvert(String str) {
         if(this.parameterType.equals(this.getType())){
-            return (Float) Float.valueOf(obj.toString());
+            return (Float) Float.valueOf(str);
         }
-        return Float.parseFloat(obj.toString());
+        return Float.parseFloat(str);
     }
 
     @Override

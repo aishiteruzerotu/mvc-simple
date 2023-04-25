@@ -21,11 +21,11 @@ public class DoubleParameterProcessor extends AbstractParameterProcessor<Double>
     }
 
     @Override
-    protected Object getConvert(Object obj) {
+    protected Object getConvert(String str) {
         if(this.parameterType.equals(this.getType())){
-            return (Double) Double.valueOf(obj.toString());
+            return (Double) Double.valueOf(str);
         }
-        return Double.parseDouble(obj.toString());
+        return Double.parseDouble(str);
     }
 
     @Override
