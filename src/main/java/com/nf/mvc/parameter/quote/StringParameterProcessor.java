@@ -1,7 +1,7 @@
-package com.nf.mvc.util.parameter.quote;
+package com.nf.mvc.parameter.quote;
 
 import com.nf.mvc.support.Order;
-import com.nf.mvc.util.AbstractParameterProcessor;
+import com.nf.mvc.AbstractParameterProcessor;
 
 /**
  * Parameter 的类型是 String 类型的则不需要任何处理

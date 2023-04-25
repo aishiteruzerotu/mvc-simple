@@ -1,6 +1,6 @@
-package com.nf.mvc.util.parameter.basic;
+package com.nf.mvc.parameter.basic;
 
-import com.nf.mvc.util.AbstractParameterProcessor;
+import com.nf.mvc.AbstractParameterProcessor;
 
 public class BooleanParameterProcessor extends AbstractParameterProcessor<Boolean> {
     @Override

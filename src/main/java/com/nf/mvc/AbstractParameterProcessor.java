@@ -1,4 +1,4 @@
-package com.nf.mvc.util;
+package com.nf.mvc;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Parameter;
