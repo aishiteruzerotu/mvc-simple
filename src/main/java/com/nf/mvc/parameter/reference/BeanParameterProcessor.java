@@ -1,8 +1,7 @@
-package com.nf.mvc.parameter.quote;
+package com.nf.mvc.parameter.reference;
 
 import com.nf.mvc.Handler;
 import com.nf.mvc.ParameterProcessor;
-import com.nf.mvc.annotation.Model;
 import com.nf.mvc.support.Order;
 import com.nf.mvc.util.ReflectionUtils;
 import org.apache.commons.beanutils.BeanUtils;
@@ -12,7 +11,7 @@ import java.io.IOException;
 import java.lang.reflect.Parameter;
 import java.rmi.RemoteException;
 
-@Order(3)
+@Order(4)
 public class BeanParameterProcessor implements ParameterProcessor {
 
     protected Parameter parameter;
@@ -24,8 +23,7 @@ public class BeanParameterProcessor implements ParameterProcessor {
         this.parameter = parameter;
         this.parameterType = parameter.getType();
 
-        return this.parameter.isAnnotationPresent(Model.class)
-                || !this.parameterType.isArray() && !this.parameterType.isEnum()
+        return !this.parameterType.isArray() && !this.parameterType.isEnum()
                 && !this.parameterType.isPrimitive() && !this.isPackage();
     }
 
