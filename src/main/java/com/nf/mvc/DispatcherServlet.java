@@ -28,9 +28,9 @@ public class DispatcherServlet extends HttpServlet {
     public void init(ServletConfig config) throws ServletException {
         this.initSetScanResult(config);
 
-        this.initParameterProcessors();
         this.initHandlerMappings();
         this.initHandlerAdapters();
+        this.initParameterProcessors();
     }
 
     protected void initSetScanResult(ServletConfig config) {
@@ -122,7 +122,7 @@ public class DispatcherServlet extends HttpServlet {
         } catch (ServletException | IOException e) {
             throw e;
         } catch (Exception ex) {
-            System.out.println("yichang dispatcher------");
+            throw new RuntimeException("无法正常访问",ex);
         }
     }
 
