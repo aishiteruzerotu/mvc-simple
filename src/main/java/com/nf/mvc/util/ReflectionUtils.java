@@ -11,20 +11,21 @@ public class ReflectionUtils {
     public static Object newInstance(Class<?> scanedClass) {
         try {
             return scanedClass.getDeclaredConstructor().newInstance();
-        } catch (Exception e){
-            return null;
+        } catch (Exception e) {
+            throw new RuntimeException("无法创建 " + scanedClass + " 的实例,需要一个无参的构造函数 " + e.getMessage(), e);
         }
     }
 
     /**
      * 用于获取为被编译的声明名称
+     *
      * @param clazz:方法所在的类
      * @param methodName：方法的名字
      * @param paramTypes：方法的参数类型，以便支持重载
      * @return 方法各个参数的名字（依据参数位置顺序依次返回）
      */
     public static List<String> getParamNames(Class<?> clazz, String methodName, Class... paramTypes) {
-        if(paramTypes.length==0){
+        if (paramTypes.length == 0) {
             return null;
         }
         List<String> paramNames = new ArrayList<>();
@@ -34,9 +35,9 @@ public class ReflectionUtils {
 
             CtClass[] paramClasses = new CtClass[paramTypes.length];
             for (int i = 0; i < paramTypes.length; i++) {
-                paramClasses[i] =pool.get(paramTypes[i].getName());
+                paramClasses[i] = pool.get(paramTypes[i].getName());
             }
-            CtMethod ctMethod = ctClass.getDeclaredMethod(methodName,paramClasses);
+            CtMethod ctMethod = ctClass.getDeclaredMethod(methodName, paramClasses);
             // 使用javassist的反射方法的参数名
             javassist.bytecode.MethodInfo methodInfo = ctMethod.getMethodInfo();
             CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
@@ -52,7 +53,7 @@ public class ReflectionUtils {
             }
             return paramNames;
         } catch (NotFoundException e) {
-            throw new RuntimeException("无法获取到参数的名称",e);
+            throw new RuntimeException("无法获取到参数的名称", e);
         }
     }
 }

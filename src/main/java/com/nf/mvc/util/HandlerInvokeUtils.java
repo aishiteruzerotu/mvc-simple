@@ -22,7 +22,7 @@ public class HandlerInvokeUtils {
                 obj = method.invoke(instance, args);
             }
         } catch (Exception e) {
-            System.out.println("无法运行");
+            throw new RuntimeException("无法调用 "+ method +" 方法 "+e.getMessage(),e);
         }
         return getViewResult(obj);
     }

@@ -19,14 +19,8 @@ public class JsonUtils {
         return valueAsString;
     }
 
-    public static  <T> T read(InputStream stream, Class<T> vo ){
+    public static  <T> T read(InputStream stream, Class<T> vo ) throws IOException {
         ObjectMapper objectMapper = ObjectMapperUtils.getObjectMapper();
-        T result = null;
-        try {
-            result = objectMapper.readValue(stream, vo);
-        } catch (IOException e) {
-            throw new RuntimeException("json反序列化出错",e);
-        }
-        return result;
+        return objectMapper.readValue(stream, vo);
     }
 }
