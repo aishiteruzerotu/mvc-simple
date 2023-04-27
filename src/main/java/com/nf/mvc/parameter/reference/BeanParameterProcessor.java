@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.lang.reflect.Parameter;
 import java.rmi.RemoteException;
 
-@Order(4)
+@Order(5)
 public class BeanParameterProcessor implements ParameterProcessor {
 
     protected Parameter parameter;

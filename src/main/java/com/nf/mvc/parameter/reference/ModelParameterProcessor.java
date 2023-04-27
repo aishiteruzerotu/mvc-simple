@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.lang.reflect.Parameter;
 
-@Order(3)
+@Order(4)
 public class ModelParameterProcessor implements ParameterProcessor {
 
     protected Parameter parameter;

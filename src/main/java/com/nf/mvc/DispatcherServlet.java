@@ -158,6 +158,8 @@ public class DispatcherServlet extends HttpServlet {
 
     protected void doService(HttpServletRequest req, HttpServletResponse resp){
         String uri = this.getUri(req);
+        HandlerContext context = HandlerContext.getContext();
+        context.setRequest(req).setResponse(resp);
         try {
             Handler handler = this.getHandlerMapping(uri);
             if (handler != null) {
@@ -167,6 +169,9 @@ public class DispatcherServlet extends HttpServlet {
             }
         }  catch (Throwable ex) {
             throw new RuntimeException("无法正常访问",ex);
+        }finally {
+            // 必须要清掉请求上下文，不然会引起堆栈溢出的问题
+            context.clear();
         }
     }
 
