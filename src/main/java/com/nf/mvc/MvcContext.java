@@ -50,10 +50,11 @@ public class MvcContext {
     private List<HandlerExceptionResolver> defaultExceptionResolvers = new ArrayList<>();
     //endregion
 
-    private MvcContext(){}
+    private MvcContext() {
+    }
 
     //region 初始化
-    public static MvcContext getMvcContext(){
+    public static MvcContext getMvcContext() {
         return instance;
     }
 
@@ -61,7 +62,7 @@ public class MvcContext {
      * 设置成public修饰符，框架使用者是可以直接修改这个扫描
      * 影响就不是很好，所以就改成default修饰符，只能在本包
      * 或子包中访问，基本上就是mvc框架内可以访问
-     *
+     * <p>
      * 我设计的mvc框架，是有以下几个扩展点
      * DispatcherServlet
      * HandlerMapping
@@ -69,7 +70,7 @@ public class MvcContext {
      * ParameterProcessor
      * HandlerExceptionResolver
      * ViewResult
-     *
+     * <p>
      * 目前扫描的是各种各样，有HandlerMapping，也有HandlerAdapter
      * 也有Handler
      * 因为一般不会写一个类，实现多个接口，所以这种多个if写法问题不大
@@ -78,15 +79,15 @@ public class MvcContext {
      */
     void config(ScanResult scanResult) {
 
-        this.scanResult =scanResult;
+        this.scanResult = scanResult;
         ClassInfoList allClasses = scanResult.getAllClasses();
         for (ClassInfo classInfo : allClasses) {
             Class<?> scanedClass = classInfo.loadClass();
 
-            this.setList(HandlerMapping.class,scanedClass,this.customHandlerMappings);
-            this.setList(HandlerAdapter.class,scanedClass,this.customHandlerAdapters);
-            this.setList(ParameterProcessor.class,scanedClass,this.customParameterProcessors);
-            this.setList(HandlerExceptionResolver.class,scanedClass,this.customExceptionResolvers);
+            this.setList(HandlerMapping.class, scanedClass, this.customHandlerMappings);
+            this.setList(HandlerAdapter.class, scanedClass, this.customHandlerAdapters);
+            this.setList(ParameterProcessor.class, scanedClass, this.customParameterProcessors);
+            this.setList(HandlerExceptionResolver.class, scanedClass, this.customExceptionResolvers);
 
             allScanedClasses.add(scanedClass);
         }
@@ -98,15 +99,15 @@ public class MvcContext {
         this.customExceptionResolvers.sort(ORDER_COMPARATOR);
     }
 
-    private <T> void setList(Class<? extends T> clz,Class<?> scanedClass,List<T> arr){
+    private <T> void setList(Class<? extends T> clz, Class<?> scanedClass, List<T> arr) {
         if (clz.isAssignableFrom(scanedClass)) {
             T exceptionResolver = (T) ReflectionUtils.newInstance(scanedClass);
             arr.add(exceptionResolver);
         }
     }
 
-    ScanResult getScanResult(){
-        return  this.scanResult;
+    ScanResult getScanResult() {
+        return this.scanResult;
     }
 
     void setHandlerMappings(List<HandlerMapping> handlerMappings) {
@@ -125,9 +126,32 @@ public class MvcContext {
         this.exceptionResolvers = exceptionResolvers;
     }
 
+    void init() {
+        this.defaultHandlerMappings.add(new RequestControllerHandlerMapping());
+        this.defaultHandlerMappings.add(new NameConventionHandlerMapping());
+        this.defaultHandlerMappings.add(new MethodRequestMappingHandlerMapping());
+
+        this.defaultHandlerAdapters.add(new MethodRequestMappingHandlerAdapter());
+        this.defaultHandlerAdapters.add(new HttpRequestHandlerAdapter());
+        this.defaultHandlerAdapters.add(new MethodNameHandlerAdapter());
+
+        ScanResult scanResult = ScanUtils.scan("com.nf.mvc.parameter");
+        ClassInfoList allClasses = scanResult.getAllClasses();
+        for (ClassInfo classInfo : allClasses) {
+            Class<?> scanedClass = classInfo.loadClass();
+            ParameterProcessor exceptionResolver = (ParameterProcessor) ReflectionUtils.newInstance(scanedClass);
+            this.defaultParameterProcessors.add(exceptionResolver);
+        }
+        this.defaultParameterProcessors.sort(new OrderComparator<>());
+
+        this.defaultExceptionResolvers.add(new ExceptionHandlerExceptionResolver());
+        this.defaultExceptionResolvers.add(new PrintStackTraceHandlerExceptionResolver());
+    }
+
     //endregion
 
     //region 返回所有的实现类
+
     /**
      * 因为我们解析之后，结果就是固定的，如果直接返回List
      * 用户是可以改这个集合里面的内容，所以返回一个只读集合
@@ -138,19 +162,19 @@ public class MvcContext {
         return Collections.unmodifiableList(this.handlerMappings);
     }
 
-    public List<HandlerAdapter> getHandlerAdapters(){
+    public List<HandlerAdapter> getHandlerAdapters() {
         return Collections.unmodifiableList(this.handlerAdapters);
     }
 
-    public List<ParameterProcessor> getParameterProcessors(){
+    public List<ParameterProcessor> getParameterProcessors() {
         return Collections.unmodifiableList(this.parameterProcessors);
     }
 
-    public List<HandlerExceptionResolver> getExceptionResolvers(){
+    public List<HandlerExceptionResolver> getExceptionResolvers() {
         return Collections.unmodifiableList(this.exceptionResolvers);
     }
 
-    public List<Class<?>> getAllScanedClasses(){
+    public List<Class<?>> getAllScanedClasses() {
         return Collections.unmodifiableList(this.allScanedClasses);
     }
     //endregion
@@ -175,36 +199,18 @@ public class MvcContext {
 
     //region 返回默认实现类
     public List<HandlerMapping> getDefaultHandlerMappings() {
-        this.defaultHandlerMappings.add(new RequestControllerHandlerMapping());
-        this.defaultHandlerMappings.add(new NameConventionHandlerMapping());
-        this.defaultHandlerMappings.add(new MethodRequestMappingHandlerMapping());
         return Collections.unmodifiableList(this.defaultHandlerMappings);
     }
 
     public List<HandlerAdapter> getDefaultHandlerAdapters() {
-        this.defaultHandlerAdapters.add(new MethodRequestMappingHandlerAdapter());
-        this.defaultHandlerAdapters.add(new HttpRequestHandlerAdapter());
-        this.defaultHandlerAdapters.add(new MethodNameHandlerAdapter());
         return Collections.unmodifiableList(this.defaultHandlerAdapters);
     }
 
     public List<ParameterProcessor> getDefaultParameterProcessors() {
-        ScanResult scanResult = ScanUtils.scan("com.nf.mvc.parameter");
-        ClassInfoList allClasses = scanResult.getAllClasses();
-        for (ClassInfo classInfo : allClasses) {
-            Class<?> scanedClass = classInfo.loadClass();
-            if (scanedClass.isAssignableFrom(scanedClass)) {
-                ParameterProcessor exceptionResolver = (ParameterProcessor) ReflectionUtils.newInstance(scanedClass);
-                this.defaultParameterProcessors.add(exceptionResolver);
-            }
-        }
-        this.defaultParameterProcessors.sort(new OrderComparator<>());
         return Collections.unmodifiableList(this.defaultParameterProcessors);
     }
 
     public List<HandlerExceptionResolver> getDefaultExceptionResolvers() {
-        this.defaultExceptionResolvers.add(new ExceptionHandlerExceptionResolver());
-        this.defaultExceptionResolvers.add(new PrintStackTraceHandlerExceptionResolver());
         return Collections.unmodifiableList(this.defaultExceptionResolvers);
     }
     //endregion

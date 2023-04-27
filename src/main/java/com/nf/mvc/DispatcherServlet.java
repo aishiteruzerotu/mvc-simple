@@ -52,7 +52,8 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     private void initMvcContext(ScanResult scanResult) {
-        MvcContext.getMvcContext().config(scanResult);
+        MVC_CONTEXT.config(scanResult);
+        MVC_CONTEXT.init();
     }
 
     private void initHandlerMappings() {

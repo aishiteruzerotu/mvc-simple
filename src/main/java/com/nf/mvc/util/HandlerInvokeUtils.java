@@ -2,6 +2,7 @@ package com.nf.mvc.util;
 
 import com.nf.mvc.Handler;
 import com.nf.mvc.ViewResult;
+import com.nf.mvc.exception.exceptions.UnableToExecuteException;
 
 import java.lang.reflect.Method;
 
@@ -20,7 +21,7 @@ public class HandlerInvokeUtils {
                 obj = method.invoke(instance, args);
             }
         } catch (Exception e) {
-            throw new RuntimeException("无法调用 "+ method +" 方法 "+e.getMessage(),e);
+            throw new UnableToExecuteException("无法调用 "+ method +" 方法 "+e.getMessage());
         }
         return ResultViewResult.getViewResult(obj);
     }

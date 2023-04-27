@@ -1,6 +1,7 @@
 package com.nf.mvc.util;
 
 import com.nf.mvc.*;
+import com.nf.mvc.exception.exceptions.UnableToProcessTypeException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +38,7 @@ public class CallParametersUtils {
                 return parameterProcessor.processor(handler, req);
             }
         }
-        return new RuntimeException("无法处理 " + parameter.getType() + " 类型的参数。可以添加 " +
+        return new UnableToProcessTypeException("无法处理 " + parameter.getType() + " 类型的参数。可以添加 " +
                 ParameterProcessor.class + " 的实现类已支持 " + parameter.getType() + "参数的处理");
     }
 

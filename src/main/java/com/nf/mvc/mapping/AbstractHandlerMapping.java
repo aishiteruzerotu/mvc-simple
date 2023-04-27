@@ -4,6 +4,7 @@ import com.nf.mvc.Handler;
 import com.nf.mvc.HandlerMapping;
 import com.nf.mvc.MvcContext;
 import com.nf.mvc.annotation.RequestMapping;
+import com.nf.mvc.exception.exceptions.RepeatException;
 import com.nf.mvc.handler.HandlerDefault;
 
 import java.lang.reflect.Method;
@@ -55,7 +56,7 @@ public abstract class AbstractHandlerMapping implements HandlerMapping {
      */
     protected boolean isNullURIMapping(Class<?> clz, Method method, String uri) {
         if (this.handlers.get(uri)!=null) {
-            throw new RuntimeException("不能出现重复的映射， " + clz + " 的 " + method.getName() + " 方法的 " + uri + " 映射重复");
+            throw new RepeatException("不能出现重复的映射， " + clz + " 的 " + method.getName() + " 方法的 " + uri + " 映射重复");
         }
         return true;
     }
