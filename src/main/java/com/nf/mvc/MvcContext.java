@@ -3,6 +3,8 @@ package com.nf.mvc;
 import com.nf.mvc.adapters.HttpRequestHandlerAdapter;
 import com.nf.mvc.adapters.MethodNameHandlerAdapter;
 import com.nf.mvc.adapters.MethodRequestMappingHandlerAdapter;
+import com.nf.mvc.exception.ExceptionHandlerExceptionResolver;
+import com.nf.mvc.exception.PrintStackTraceHandlerExceptionResolver;
 import com.nf.mvc.mapping.MethodRequestMappingHandlerMapping;
 import com.nf.mvc.mapping.NameConventionHandlerMapping;
 import com.nf.mvc.mapping.RequestControllerHandlerMapping;
@@ -201,6 +203,8 @@ public class MvcContext {
     }
 
     public List<HandlerExceptionResolver> getDefaultExceptionResolvers() {
+        this.defaultExceptionResolvers.add(new ExceptionHandlerExceptionResolver());
+        this.defaultExceptionResolvers.add(new PrintStackTraceHandlerExceptionResolver());
         return Collections.unmodifiableList(this.defaultExceptionResolvers);
     }
     //endregion

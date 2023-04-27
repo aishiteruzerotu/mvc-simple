@@ -1,5 +1,7 @@
 package com.nf.mvc;
 
+import com.nf.mvc.exception.ExceptionHandlerExceptionResolver;
+import com.nf.mvc.exception.PrintStackTraceHandlerExceptionResolver;
 import com.nf.mvc.util.ScanUtils;
 import io.github.classgraph.ScanResult;
 
@@ -20,6 +22,7 @@ public class DispatcherServlet extends HttpServlet {
     protected List<HandlerMapping> handlerMappings = new ArrayList<>();
     protected List<HandlerAdapter> handlerAdapters = new ArrayList<>();
     protected List<ParameterProcessor> parameterProcessors = new ArrayList<>();
+    private List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
 
     protected static MvcContext MVC_CONTEXT = MvcContext.getMvcContext();
 
@@ -31,6 +34,7 @@ public class DispatcherServlet extends HttpServlet {
         this.initHandlerMappings();
         this.initHandlerAdapters();
         this.initParameterProcessors();
+        this.initExceptionResolvers();
     }
 
     protected void initSetScanResult(ServletConfig config) {
@@ -109,21 +113,33 @@ public class DispatcherServlet extends HttpServlet {
         return MVC_CONTEXT.getCustomParameterProcessors();
     }
 
+    private void initExceptionResolvers() {
+        //优先添加用户自定义的 HandlerExceptionResolver
+        List<HandlerExceptionResolver> customExceptionResolvers = this.getCustomExceptionResolvers();
+        //mvc框架自身的 HandlerExceptionResolver 优先级更低，后注册
+        List<HandlerExceptionResolver> defaultExceptionResolvers = this.getDefaultExceptionResolvers();
+
+        exceptionResolvers.addAll(customExceptionResolvers);
+        exceptionResolvers.addAll(defaultExceptionResolvers);
+        //把定制+默认的所有 HandlerExceptionResolver 组件添加到上下文中
+        MVC_CONTEXT.setExceptionResolvers(exceptionResolvers);
+    }
+
+    protected List<HandlerExceptionResolver> getCustomExceptionResolvers() {
+        return MVC_CONTEXT.getCustomExceptionResolvers();
+    }
+
+    protected List<HandlerExceptionResolver> getDefaultExceptionResolvers() {
+        return MVC_CONTEXT.getDefaultExceptionResolvers();
+    }
+
     //endregion
 
     //region 调用逻辑
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         this.setEncoding(req, resp);
-        String uri = this.getUri(req);
-        try {
-            Handler handler = this.getHandlerMapping(uri);
-            this.doService(req, resp, handler);
-        } catch (ServletException | IOException e) {
-            throw e;
-        } catch (Exception ex) {
-            throw new RuntimeException("无法正常访问",ex);
-        }
+        this.doService(req,resp);
     }
 
     /**
@@ -139,13 +155,43 @@ public class DispatcherServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
     }
 
-    protected void doService(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {
-        if (handler == null) {
-            this.noHandlerFound(req, resp);
-            return;
+    protected void doService(HttpServletRequest req, HttpServletResponse resp){
+        String uri = this.getUri(req);
+        try {
+            Handler handler = this.getHandlerMapping(uri);
+            if (handler != null) {
+                this.doDispatch(req, resp, handler);
+            }else {
+                this.noHandlerFound(req, resp);
+            }
+        }  catch (Throwable ex) {
+            throw new RuntimeException("无法正常访问",ex);
         }
-        ViewResult viewResult = this.getHandlerAdapter(req, resp, handler);
+    }
+
+    protected void doDispatch(HttpServletRequest req, HttpServletResponse resp,Handler handler) throws Throwable {
+        ViewResult viewResult;
+        try {
+//            HandlerAdapter adapter = getHandlerAdapter(handler);
+            viewResult = this.getViewResult(req, resp, handler);
+        } catch (Exception ex) {
+            //这里只处理Exception，非Exception并没有处理，会继续抛出给doService处理
+            //这个异常处理也只是处理了Handler整个执行层面的异常，
+            // 视图渲染层面的异常是没有处理的，要处理的话可以在doService方法里处理
+            viewResult = this.resolveException(req, resp, handler, ex);
+        }
         this.render(req, resp, viewResult);
+    }
+
+    protected ViewResult resolveException(HttpServletRequest req, HttpServletResponse resp, Handler handler, Exception ex) throws Exception{
+        for (HandlerExceptionResolver exceptionResolver : exceptionResolvers) {
+            ViewResult result = exceptionResolver.resolveException(req, resp, handler, ex);
+            if (result != null) {
+                return result;
+            }
+        }
+        /*表示没有一个异常解析器可以处理异常，那么就应该把异常继续抛出*/
+        throw ex;
     }
 
     protected void noHandlerFound(HttpServletRequest req, HttpServletResponse resp) throws Exception {
@@ -157,7 +203,7 @@ public class DispatcherServlet extends HttpServlet {
         req.getServletContext().getNamedDispatcher("default").forward(req, resp);
     }
 
-    private void render(HttpServletRequest req, HttpServletResponse resp, ViewResult viewResult) throws ServletException, IOException {
+    protected void render(HttpServletRequest req, HttpServletResponse resp, ViewResult viewResult) throws ServletException, IOException {
         viewResult.render(req, resp);
     }
 
@@ -176,13 +222,14 @@ public class DispatcherServlet extends HttpServlet {
         return null;
     }
 
-    protected ViewResult getHandlerAdapter(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {
+    protected ViewResult getViewResult(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {
         for (HandlerAdapter adapter : this.handlerAdapters) {
             if (adapter.supports(handler)) {
                 return adapter.handle(req, resp, handler);
             }
         }
-        throw new ServletException("此Handler没有对应的adapter去处理，请在DispatcherServlet中进行额外的配置");
+        throw new ServletException("此Handler没有对应的adapter去处理，请在DispatcherServlet中进行额外的配置，或者添加 "
+                +HandlerAdapter.class+" 实现类以支持该Handed的处理");
     }
     //endregion
 }
