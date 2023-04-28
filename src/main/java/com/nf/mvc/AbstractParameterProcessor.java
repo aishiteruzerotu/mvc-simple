@@ -2,6 +2,7 @@ package com.nf.mvc;
 
 import com.nf.mvc.annotation.RequestParam;
 import com.nf.mvc.annotation.ValueConstants;
+import com.nf.mvc.exception.exceptions.NoAssignmentToPrimitiveIsNullException;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Parameter;
@@ -44,7 +45,7 @@ public abstract class AbstractParameterProcessor<T> implements ParameterProcesso
     protected String getValue(HttpServletRequest req, String key) {
         String value = req.getParameter(key);
         if (value==null&&this.parameterType.isPrimitive()){
-            throw new IllegalArgumentException("不能把null给简单类型");
+            throw new NoAssignmentToPrimitiveIsNullException("不能把null给简单类型");
         }
         if (value==null&&this.parameter.isAnnotationPresent(RequestParam.class)){
             String defaultValue = this.parameter.getDeclaredAnnotation(RequestParam.class).defaultValue();

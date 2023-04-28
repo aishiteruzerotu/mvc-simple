@@ -1,5 +1,8 @@
 package com.nf.mvc.exception.exceptions;
 
+/**
+ * 无法实例化异常
+ */
 public class NoInstantiateException extends RuntimeException{
     public NoInstantiateException() {
     }
