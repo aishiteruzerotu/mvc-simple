@@ -2,6 +2,9 @@ package com.nf.mvc;
 
 import com.nf.mvc.exception.ExceptionHandlerExceptionResolver;
 import com.nf.mvc.exception.PrintStackTraceHandlerExceptionResolver;
+import com.nf.mvc.support.HttpHeaders;
+import com.nf.mvc.support.HttpMethod;
+import com.nf.mvc.util.CorsUtils;
 import com.nf.mvc.util.ScanUtils;
 import io.github.classgraph.ScanResult;
 
@@ -140,6 +143,11 @@ public class DispatcherServlet extends HttpServlet {
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         this.setEncoding(req, resp);
+        processCors(req, resp, new CorsConfiguration());
+        /*如果是预检请求需要return，以便及时响应预检请求，以便处理后续的真正请求*/
+        if (CorsUtils.isPreFlightRequest(req)) {
+            return;
+        }
         this.doService(req,resp);
     }
 
@@ -172,6 +180,33 @@ public class DispatcherServlet extends HttpServlet {
         }finally {
             // 必须要清掉请求上下文，不然会引起堆栈溢出的问题
             context.clear();
+        }
+    }
+
+    /**
+     * 这里没有用到cors配置，纯粹的直接允许跨域请求
+     * @param req
+     * @param resp
+     * @param configuration
+     */
+    protected void processCors(HttpServletRequest req, HttpServletResponse resp, CorsConfiguration configuration) {
+        // 解决跨域请求问题
+        String origin = req.getHeader(HttpHeaders.ORIGIN);
+
+        // 允许指定域访问跨域资源
+        resp.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, origin);
+        // 允许客户端携带跨域cookie，此时origin值不能为“*”，只能为指定单一域名
+        resp.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_CREDENTIALS, "true");
+
+        if (HttpMethod.OPTIONS.matches(req.getMethod())) {
+            String allowMethod = req.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD);
+            String allowHeaders = req.getHeader(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS);
+            // 浏览器缓存预检请求结果时间,单位:秒
+            resp.setHeader(HttpHeaders.ACCESS_CONTROL_MAX_AGE, "86400");
+            // 允许浏览器在预检请求成功之后发送的实际请求方法名
+            resp.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, allowMethod);
+            // 允许浏览器发送的请求消息头
+            resp.setHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, allowHeaders);
         }
     }
 
