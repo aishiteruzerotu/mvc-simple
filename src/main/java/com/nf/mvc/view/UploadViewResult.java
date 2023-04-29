@@ -18,6 +18,7 @@ public class UploadViewResult extends ViewResult {
     @Override
     public void render(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         resp.setContentType("text/html;charset=UTF-8");
+        // TODO: 文件上传
         Part part = req.getPart("picture");
         part.write(filePath);
         resp.getWriter().write("文件地址"+ filePath);

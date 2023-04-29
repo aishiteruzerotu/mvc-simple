@@ -32,7 +32,7 @@ public class CallParametersUtils {
         return objects;
     }
 
-    public static Object getObject(Handler handler, Parameter parameter, HttpServletRequest req) throws IOException {
+    public static Object getObject(Handler handler, Parameter parameter, HttpServletRequest req) throws IOException, ServletException {
         for (ParameterProcessor parameterProcessor : parameterProcessorList) {
             if (parameterProcessor.supports(parameter)) {
                 return parameterProcessor.processor(handler, req);

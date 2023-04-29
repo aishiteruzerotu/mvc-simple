@@ -6,7 +6,7 @@ import java.nio.file.Files;
 public abstract class FileCopyUtils {
 
     public static final int BUFFER_SIZE = StreamUtils.BUFFER_SIZE;
-
+    public static final String CONTENT_DISPOSITION = "Content-Disposition";
     //---------------------------------------------------------------------
     // Copy methods for java.io.File
     //---------------------------------------------------------------------
