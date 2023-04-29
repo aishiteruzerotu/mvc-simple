@@ -47,5 +47,10 @@
         <version>3.28.0-GA</version>
         <optional>true</optional>
     </dependency>
+    <dependency>
+        <groupId>com.nf</groupId>
+        <artifactId>convert-simple-utils</artifactId>
+        <version>1.0</version>
+    </dependency>
 </dependencies>
 </project>
