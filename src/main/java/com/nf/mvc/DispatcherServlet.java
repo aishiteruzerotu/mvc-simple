@@ -95,7 +95,7 @@ public class DispatcherServlet extends HttpServlet {
         return MVC_CONTEXT.getCustomHandlerAdapters();
     }
 
-    private void initParameterProcessors(){
+    private void initParameterProcessors() {
 
         List<ParameterProcessor> customArgumentResolvers = this.getCustomParameterProcessors();
 
@@ -146,7 +146,7 @@ public class DispatcherServlet extends HttpServlet {
         if (CorsUtils.isPreFlightRequest(req)) {
             return;
         }
-        this.doService(req,resp);
+        this.doService(req, resp);
     }
 
     /**
@@ -162,32 +162,33 @@ public class DispatcherServlet extends HttpServlet {
         resp.setCharacterEncoding("UTF-8");
     }
 
-    protected void doService(HttpServletRequest req, HttpServletResponse resp){
+    protected void doService(HttpServletRequest req, HttpServletResponse resp) {
         String uri = this.getUri(req);
         HandlerContext context = HandlerContext.getContext();
         context.setRequest(req).setResponse(resp);
         try {
             Handler handler = this.getHandler(uri);
             if (handler != null) {
-                HandlerExecutionChain handlerExecutionChain = this.getHandlerExecutionChain(handler);
+                HandlerExecutionChain handlerExecutionChain = this.getHandlerExecutionChain(handler, uri);
                 this.doDispatch(req, resp, handlerExecutionChain);
-            }else {
+            } else {
                 this.noHandlerFound(req, resp);
             }
-        }  catch (Throwable ex) {
-            throw new RuntimeException("无法正常访问",ex);
-        }finally {
+        } catch (Throwable ex) {
+            throw new RuntimeException("无法正常访问", ex);
+        } finally {
             // 必须要清掉请求上下文，不然会引起堆栈溢出的问题
             context.clear();
         }
     }
 
-    protected HandlerExecutionChain getHandlerExecutionChain(Handler handler) {
-        return new HandlerExecutionChain(handler,MVC_CONTEXT.getCustomHandlerInterceptors());
+    protected HandlerExecutionChain getHandlerExecutionChain(Handler handler, String uri) {
+        return new HandlerExecutionChain(handler, HandlerInterceptorMapping.getHandlerInterceptors(uri));
     }
 
     /**
      * 这里没有用到cors配置，纯粹的直接允许跨域请求
+     *
      * @param req
      * @param resp
      * @param configuration
@@ -218,6 +219,7 @@ public class DispatcherServlet extends HttpServlet {
         try {
             //这里返回false，直接return，结束后续流程
             if (!chain.applyPreHandle(req, resp)) {
+                chain.applyPostHandle(req, resp);
                 return;
             }
 
@@ -233,7 +235,7 @@ public class DispatcherServlet extends HttpServlet {
         render(req, resp, viewResult);
     }
 
-    protected ViewResult resolveException(HttpServletRequest req, HttpServletResponse resp, Handler handler, Exception ex) throws Exception{
+    protected ViewResult resolveException(HttpServletRequest req, HttpServletResponse resp, Handler handler, Exception ex) throws Exception {
         for (HandlerExceptionResolver exceptionResolver : exceptionResolvers) {
             ViewResult result = exceptionResolver.resolveException(req, resp, handler, ex);
             if (result != null) {
@@ -279,7 +281,7 @@ public class DispatcherServlet extends HttpServlet {
             }
         }
         throw new ServletException("此Handler没有对应的adapter去处理，请在DispatcherServlet中进行额外的配置，或者添加 "
-                +HandlerAdapter.class+" 实现类以支持该Handed的处理");
+                + HandlerAdapter.class + " 实现类以支持该Handed的处理");
     }
     //endregion
 }
