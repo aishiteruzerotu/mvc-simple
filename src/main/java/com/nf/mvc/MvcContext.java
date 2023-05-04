@@ -42,6 +42,7 @@ public class MvcContext {
     private List<HandlerAdapter> customHandlerAdapters = new ArrayList<>();
     private List<ParameterProcessor> customParameterProcessors = new ArrayList<>();
     private List<HandlerExceptionResolver> customExceptionResolvers = new ArrayList<>();
+    private List<HandlerInterceptor> customHandlerInterceptors = new ArrayList<>();
 
     //自身框架提供实现类
     private List<HandlerMapping> defaultHandlerMappings = new ArrayList<>();
@@ -84,10 +85,7 @@ public class MvcContext {
         for (ClassInfo classInfo : allClasses) {
             Class<?> scanedClass = classInfo.loadClass();
 
-            this.setList(HandlerMapping.class, scanedClass, this.customHandlerMappings);
-            this.setList(HandlerAdapter.class, scanedClass, this.customHandlerAdapters);
-            this.setList(ParameterProcessor.class, scanedClass, this.customParameterProcessors);
-            this.setList(HandlerExceptionResolver.class, scanedClass, this.customExceptionResolvers);
+            setList(scanedClass);
 
             allScanedClasses.add(scanedClass);
         }
@@ -97,6 +95,15 @@ public class MvcContext {
         this.customHandlerAdapters.sort(ORDER_COMPARATOR);
         this.customParameterProcessors.sort(ORDER_COMPARATOR);
         this.customExceptionResolvers.sort(ORDER_COMPARATOR);
+        this.customHandlerInterceptors.sort(ORDER_COMPARATOR);
+    }
+
+    private void setList(Class<?> scanedClass) {
+        this.setList(HandlerMapping.class, scanedClass, this.customHandlerMappings);
+        this.setList(HandlerAdapter.class, scanedClass, this.customHandlerAdapters);
+        this.setList(ParameterProcessor.class, scanedClass, this.customParameterProcessors);
+        this.setList(HandlerExceptionResolver.class, scanedClass, this.customExceptionResolvers);
+        this.setList(HandlerInterceptor.class, scanedClass, this.customHandlerInterceptors);
     }
 
     private <T> void setList(Class<? extends T> clz, Class<?> scanedClass, List<T> arr) {
@@ -195,6 +202,11 @@ public class MvcContext {
     public List<HandlerExceptionResolver> getCustomExceptionResolvers() {
         return Collections.unmodifiableList(this.customExceptionResolvers);
     }
+
+    public List<HandlerInterceptor> getCustomHandlerInterceptors() {
+        return Collections.unmodifiableList(this.customHandlerInterceptors);
+    }
+
     //endregion
 
     //region 返回默认实现类

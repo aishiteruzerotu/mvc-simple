@@ -9,7 +9,6 @@ import com.nf.mvc.annotation.ValueConstants;
 import com.nf.mvc.exception.exceptions.NoAssignmentToPrimitiveIsNullException;
 import com.nf.mvc.exception.exceptions.UnableToProcessTypeException;
 import com.nf.mvc.support.Order;
-import com.nf.mvc.util.ReflectionUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -56,7 +55,7 @@ public class SimpleTypeParameterProcessor implements ParameterProcessor {
             } else if (List.class.isAssignableFrom(paramType) || Set.class.isAssignableFrom(paramType)) {
                 //获取集合泛型参数类型
                 ParameterizedType type = (ParameterizedType) this.parameter.getParameterizedType();
-                Class<?> genericType = (Class) type.getActualTypeArguments()[0];
+                Class<?> genericType = (Class<?>) type.getActualTypeArguments()[0];
                 value = Convert.toSimpleCollection(paramType, genericType, req.getParameterValues(paramName));
             } else {
                 //比如String name,简单类型解析要考虑RequestParam注解

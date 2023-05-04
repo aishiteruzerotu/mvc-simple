@@ -1,7 +1,5 @@
 package com.nf.mvc;
 
-import com.nf.mvc.exception.ExceptionHandlerExceptionResolver;
-import com.nf.mvc.exception.PrintStackTraceHandlerExceptionResolver;
 import com.nf.mvc.support.HttpHeaders;
 import com.nf.mvc.support.HttpMethod;
 import com.nf.mvc.util.CorsUtils;
@@ -169,9 +167,10 @@ public class DispatcherServlet extends HttpServlet {
         HandlerContext context = HandlerContext.getContext();
         context.setRequest(req).setResponse(resp);
         try {
-            Handler handler = this.getHandlerMapping(uri);
+            Handler handler = this.getHandler(uri);
             if (handler != null) {
-                this.doDispatch(req, resp, handler);
+                HandlerExecutionChain handlerExecutionChain = this.getHandlerExecutionChain(handler);
+                this.doDispatch(req, resp, handlerExecutionChain);
             }else {
                 this.noHandlerFound(req, resp);
             }
@@ -181,6 +180,10 @@ public class DispatcherServlet extends HttpServlet {
             // 必须要清掉请求上下文，不然会引起堆栈溢出的问题
             context.clear();
         }
+    }
+
+    protected HandlerExecutionChain getHandlerExecutionChain(Handler handler) {
+        return new HandlerExecutionChain(handler,MVC_CONTEXT.getCustomHandlerInterceptors());
     }
 
     /**
@@ -210,18 +213,24 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    protected void doDispatch(HttpServletRequest req, HttpServletResponse resp,Handler handler) throws Throwable {
+    protected void doDispatch(HttpServletRequest req, HttpServletResponse resp, HandlerExecutionChain chain) throws Throwable {
         ViewResult viewResult;
         try {
-//            HandlerAdapter adapter = getHandlerAdapter(handler);
-            viewResult = this.getViewResult(req, resp, handler);
+            //这里返回false，直接return，结束后续流程
+            if (!chain.applyPreHandle(req, resp)) {
+                return;
+            }
+
+            viewResult = this.getViewResult(req, resp, chain.getHandler());
+
+            chain.applyPostHandle(req, resp);
         } catch (Exception ex) {
             //这里只处理Exception，非Exception并没有处理，会继续抛出给doService处理
             //这个异常处理也只是处理了Handler整个执行层面的异常，
             // 视图渲染层面的异常是没有处理的，要处理的话可以在doService方法里处理
-            viewResult = this.resolveException(req, resp, handler, ex);
+            viewResult = resolveException(req, resp, chain.getHandler(), ex);
         }
-        this.render(req, resp, viewResult);
+        render(req, resp, viewResult);
     }
 
     protected ViewResult resolveException(HttpServletRequest req, HttpServletResponse resp, Handler handler, Exception ex) throws Exception{
@@ -253,7 +262,7 @@ public class DispatcherServlet extends HttpServlet {
         return req.getRequestURI().substring(contextPath.length());
     }
 
-    protected Handler getHandlerMapping(String uri) throws Exception {
+    protected Handler getHandler(String uri) throws Exception {
         for (HandlerMapping mapping : this.handlerMappings) {
             Handler handler = mapping.getHandler(uri);
             if (handler != null) {
