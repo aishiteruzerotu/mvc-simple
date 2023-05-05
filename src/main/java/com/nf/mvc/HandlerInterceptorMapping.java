@@ -1,19 +1,31 @@
 package com.nf.mvc;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.nf.mvc.annotation.Interceptor;
 import com.nf.mvc.annotation.ValueConstants;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class HandlerInterceptorMapping {
-    private static Map<String, List<HandlerInterceptor>> handlerInterceptorMaps = new ConcurrentHashMap<>();
+    private Cache<String, List<HandlerInterceptor>> handlerInterceptors = Caffeine.newBuilder()
+            // 初始数量 20
+            .initialCapacity(20)
+            // 缓存最大条目数 50
+            .maximumSize(50)
+            .build();
 
-    private static final List<HandlerInterceptor> HANDLER_INTERCEPTORS = MvcContext.getMvcContext().getCustomHandlerInterceptors();
+    private final List<HandlerInterceptor> HANDLER_INTERCEPTORS = MvcContext.getMvcContext().getCustomHandlerInterceptors();
 
-    private static final String  DEFAULT_MAPPING_URL = "/*";
+    private final String  DEFAULT_MAPPING_URL = "/*";
 
-    private static List<HandlerInterceptor> getHandlerInterceptorList(String url) {
+    private HandlerInterceptorMapping(){}
+
+    public static HandlerInterceptorMapping getHandlerInterceptorMapping(){
+        return new HandlerInterceptorMapping();
+    }
+
+    private List<HandlerInterceptor> getHandlerInterceptorList(String url) {
         List<HandlerInterceptor> list = new ArrayList<>();
         for (HandlerInterceptor handlerInterceptor : HANDLER_INTERCEPTORS) {
             if (isMapping(handlerInterceptor,url)){
@@ -23,7 +35,7 @@ public class HandlerInterceptorMapping {
         return list;
     }
 
-    private static boolean isMapping(HandlerInterceptor handlerInterceptor,String url){
+    private boolean isMapping(HandlerInterceptor handlerInterceptor,String url){
         Class<? extends HandlerInterceptor> clz = handlerInterceptor.getClass();
         if (clz.isAnnotationPresent(Interceptor.class)) {
             Interceptor annotation = clz.getAnnotation(Interceptor.class);
@@ -48,14 +60,7 @@ public class HandlerInterceptorMapping {
         }
     }
 
-    public static List<HandlerInterceptor> getHandlerInterceptors(String url) {
-        List<HandlerInterceptor> handlerInterceptors = handlerInterceptorMaps.get(url);
-
-        if (handlerInterceptors == null) {
-            handlerInterceptors = getHandlerInterceptorList(url);
-            handlerInterceptorMaps.put(url, handlerInterceptors);
-        }
-
-        return handlerInterceptors;
+    public List<HandlerInterceptor> getHandlerInterceptors(String url) {
+        return handlerInterceptors.get(url, k -> getHandlerInterceptorList(url));
     }
 }

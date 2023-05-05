@@ -23,9 +23,11 @@ public class DispatcherServlet extends HttpServlet {
     protected List<HandlerMapping> handlerMappings = new ArrayList<>();
     protected List<HandlerAdapter> handlerAdapters = new ArrayList<>();
     protected List<ParameterProcessor> parameterProcessors = new ArrayList<>();
-    private List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
+    protected List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
 
-    protected static MvcContext MVC_CONTEXT = MvcContext.getMvcContext();
+    protected final MvcContext MVC_CONTEXT = MvcContext.getMvcContext();
+
+    protected final HandlerInterceptorMapping handlerInterceptorMapping = HandlerInterceptorMapping.getHandlerInterceptorMapping();
 
     //region 初始化逻辑
     @Override
@@ -183,7 +185,7 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     protected HandlerExecutionChain getHandlerExecutionChain(Handler handler, String uri) {
-        return new HandlerExecutionChain(handler, HandlerInterceptorMapping.getHandlerInterceptors(uri));
+        return new HandlerExecutionChain(handler, this.handlerInterceptorMapping.getHandlerInterceptors(uri));
     }
 
     /**
