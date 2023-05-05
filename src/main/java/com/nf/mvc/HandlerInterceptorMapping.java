@@ -2,12 +2,12 @@ package com.nf.mvc;
 
 import com.nf.mvc.annotation.Interceptor;
 import com.nf.mvc.annotation.ValueConstants;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HandlerInterceptorMapping {
-    private static Map<String, List<HandlerInterceptor>> handlerInterceptorMaps = new HashMap<>();
+    private static Map<String, List<HandlerInterceptor>> handlerInterceptorMaps = new ConcurrentHashMap<>();
 
     private static final List<HandlerInterceptor> HANDLER_INTERCEPTORS = MvcContext.getMvcContext().getCustomHandlerInterceptors();
 
