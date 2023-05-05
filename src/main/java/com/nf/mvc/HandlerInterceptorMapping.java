@@ -11,12 +11,7 @@ public class HandlerInterceptorMapping {
 
     private static final List<HandlerInterceptor> HANDLER_INTERCEPTORS = MvcContext.getMvcContext().getCustomHandlerInterceptors();
 
-    public static final String  DEFAULT_MAPPING_URL = "/*";
-
-    static {
-        List<HandlerInterceptor> list = getHandlerInterceptorList(DEFAULT_MAPPING_URL);
-        handlerInterceptorMaps.put(DEFAULT_MAPPING_URL, list);
-    }
+    private static final String  DEFAULT_MAPPING_URL = "/*";
 
     private static List<HandlerInterceptor> getHandlerInterceptorList(String url) {
         List<HandlerInterceptor> list = new ArrayList<>();
@@ -29,9 +24,6 @@ public class HandlerInterceptorMapping {
     }
 
     private static boolean isMapping(HandlerInterceptor handlerInterceptor,String url){
-        if (DEFAULT_MAPPING_URL.equals(url)){
-            return true;
-        }
         Class<? extends HandlerInterceptor> clz = handlerInterceptor.getClass();
         if (clz.isAnnotationPresent(Interceptor.class)) {
             Interceptor annotation = clz.getAnnotation(Interceptor.class);
@@ -49,6 +41,7 @@ public class HandlerInterceptorMapping {
                 }
                 return false;
             }
+
             return value.equals(url);
         }else {
             return true;
@@ -59,12 +52,8 @@ public class HandlerInterceptorMapping {
         List<HandlerInterceptor> handlerInterceptors = handlerInterceptorMaps.get(url);
 
         if (handlerInterceptors == null) {
-            handlerInterceptorMaps.put(url, getHandlerInterceptorList(url));
-            Set<HandlerInterceptor> set = new HashSet<>();
-            set.addAll(handlerInterceptorMaps.get(DEFAULT_MAPPING_URL));
-            set.addAll(handlerInterceptorMaps.get(url));
-            //TODO:待解决重复映射问题
-            handlerInterceptors = new ArrayList<>(set);
+            handlerInterceptors = getHandlerInterceptorList(url);
+            handlerInterceptorMaps.put(url, handlerInterceptors);
         }
 
         return handlerInterceptors;
