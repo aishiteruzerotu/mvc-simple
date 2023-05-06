@@ -35,20 +35,21 @@ public class MvcContext {
     private List<HandlerExceptionResolver> exceptionResolvers = new ArrayList<>();
 
     // 扫描到的所有的类
-    private List<Class<?>> allScanedClasses = new ArrayList<>();
+    private final List<Class<?>> allScanedClasses = new ArrayList<>();
 
     //用户定义实现类
-    private List<HandlerMapping> customHandlerMappings = new ArrayList<>();
-    private List<HandlerAdapter> customHandlerAdapters = new ArrayList<>();
-    private List<ParameterProcessor> customParameterProcessors = new ArrayList<>();
-    private List<HandlerExceptionResolver> customExceptionResolvers = new ArrayList<>();
-    private List<HandlerInterceptor> customHandlerInterceptors = new ArrayList<>();
+    private final List<HandlerMapping> customHandlerMappings = new ArrayList<>();
+    private final List<HandlerAdapter> customHandlerAdapters = new ArrayList<>();
+    private final List<ParameterProcessor> customParameterProcessors = new ArrayList<>();
+    private final List<HandlerExceptionResolver> customExceptionResolvers = new ArrayList<>();
+    private final List<HandlerInterceptor> customHandlerInterceptors = new ArrayList<>();
+    private final List<WebMvcConfigurer> customWebMvcConfigurer = new ArrayList<>();
 
     //自身框架提供实现类
-    private List<HandlerMapping> defaultHandlerMappings = new ArrayList<>();
-    private List<HandlerAdapter> defaultHandlerAdapters = new ArrayList<>();
-    private List<ParameterProcessor> defaultParameterProcessors = new ArrayList<>();
-    private List<HandlerExceptionResolver> defaultExceptionResolvers = new ArrayList<>();
+    private final List<HandlerMapping> defaultHandlerMappings = new ArrayList<>();
+    private final List<HandlerAdapter> defaultHandlerAdapters = new ArrayList<>();
+    private final List<ParameterProcessor> defaultParameterProcessors = new ArrayList<>();
+    private final List<HandlerExceptionResolver> defaultExceptionResolvers = new ArrayList<>();
     //endregion
 
     private MvcContext() {
@@ -104,6 +105,7 @@ public class MvcContext {
         this.setList(ParameterProcessor.class, scanedClass, this.customParameterProcessors);
         this.setList(HandlerExceptionResolver.class, scanedClass, this.customExceptionResolvers);
         this.setList(HandlerInterceptor.class, scanedClass, this.customHandlerInterceptors);
+        this.setList(WebMvcConfigurer.class,scanedClass,this.customWebMvcConfigurer);
     }
 
     private <T> void setList(Class<? extends T> clz, Class<?> scanedClass, List<T> arr) {
@@ -208,6 +210,12 @@ public class MvcContext {
         return Collections.unmodifiableList(this.customHandlerInterceptors);
     }
 
+    public WebMvcConfigurer getCustomWebMvcConfigurer() {
+        if (customWebMvcConfigurer.size() !=1) {
+            throw new IllegalStateException("配置器应该只写一个");
+        }
+        return customWebMvcConfigurer.get(0);
+    }
     //endregion
 
     //region 返回默认实现类

@@ -38,6 +38,23 @@ public class DispatcherServlet extends HttpServlet {
         this.initHandlerAdapters();
         this.initParameterProcessors();
         this.initExceptionResolvers();
+
+        this.setComponentScan();
+    }
+
+    protected void setComponentScan(){
+        WebMvcConfigurer webMvcConfigurer = MVC_CONTEXT.getCustomWebMvcConfigurer();
+        this.exeHandlerWebMvcConfigurer(handlerMappings,webMvcConfigurer::configureHandlerMapping);
+        this.exeHandlerWebMvcConfigurer(handlerAdapters,webMvcConfigurer::configureHandlerAdapter);
+        this.exeHandlerWebMvcConfigurer(parameterProcessors,webMvcConfigurer::configureArgumentResolver);
+        this.exeHandlerWebMvcConfigurer(exceptionResolvers,webMvcConfigurer::configureExceptionResolver);
+//        webMvcConfigurer.configureCors(MVC_CONTEXT);
+    }
+
+    protected <T> void exeHandlerWebMvcConfigurer(List<T> list, HandlerWebMvcConfigurer<T> handlerWebMvcConfigurer){
+        for (T t : list) {
+            handlerWebMvcConfigurer.exe(t);
+        }
     }
 
     protected void initSetScanResult(ServletConfig config) {
