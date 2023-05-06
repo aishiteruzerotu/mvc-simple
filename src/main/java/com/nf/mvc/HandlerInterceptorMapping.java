@@ -7,28 +7,41 @@ import com.nf.mvc.annotation.ValueConstants;
 
 import java.util.*;
 
+/**
+ * 管理拦截器，通过拦截地址获取到对应的拦截集合
+ */
 public class HandlerInterceptorMapping {
-    private Cache<String, List<HandlerInterceptor>> handlerInterceptors = Caffeine.newBuilder()
+    // Caffeine 动态清理缓存
+    private final Cache<String, List<HandlerInterceptor>> handlerInterceptors = Caffeine.newBuilder()
             // 初始数量 20
             .initialCapacity(20)
             // 缓存最大条目数 50
             .maximumSize(50)
             .build();
 
+    //获取客户提供的拦截器
     private final List<HandlerInterceptor> HANDLER_INTERCEPTORS = MvcContext.getMvcContext().getCustomHandlerInterceptors();
 
+    //默认拦截地址
     private final String  DEFAULT_MAPPING_URL = "/*";
 
     private HandlerInterceptorMapping(){}
 
+    //获取唯一的 HandlerInterceptorMapping 对象
     public static HandlerInterceptorMapping getHandlerInterceptorMapping(){
         return new HandlerInterceptorMapping();
     }
 
+    /**
+     * 根据映射地址，创建一个新的集合，存放该映射地址的拦截器
+     * @param url 映射地址
+     * @return 生成新的拦截器集合
+     */
     private List<HandlerInterceptor> getHandlerInterceptorList(String url) {
         List<HandlerInterceptor> list = new ArrayList<>();
         for (HandlerInterceptor handlerInterceptor : HANDLER_INTERCEPTORS) {
-            if (isMapping(handlerInterceptor,url)){
+            //判断拦截器是否支持拦截 当前映射 url
+            if (this.isMapping(handlerInterceptor,url)){
                 list.add(handlerInterceptor);
             }
         }
@@ -105,6 +118,11 @@ public class HandlerInterceptorMapping {
         return url.substring(0,url.lastIndexOf("/")).toLowerCase(Locale.ROOT);
     }
 
+    /**
+     * 获取拦截器
+     * @param url 请求地址
+     * @return 拦截器数组
+     */
     public List<HandlerInterceptor> getHandlerInterceptors(String url) {
         return handlerInterceptors.get(url, k -> getHandlerInterceptorList(url));
     }

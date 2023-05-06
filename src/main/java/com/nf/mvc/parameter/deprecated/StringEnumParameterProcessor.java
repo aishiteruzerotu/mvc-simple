@@ -1,12 +1,10 @@
-package com.nf.mvc.parameter.reference;
+package com.nf.mvc.parameter.deprecated;
 
-import com.nf.mvc.AbstractParameterProcessor;
-import com.nf.mvc.support.Order;
+import com.nf.mvc.parameter.AbstractDeprecatedParameterProcessor;
 
 import java.lang.reflect.Parameter;
 
-@Order(2)
-public class StringEnumParameterProcessor extends AbstractParameterProcessor<Enum> {
+public class StringEnumParameterProcessor extends AbstractDeprecatedParameterProcessor<Enum> {
     @Override
     protected boolean isType(Parameter parameter) {
         return parameter.getType().isEnum();

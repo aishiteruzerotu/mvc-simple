@@ -2,6 +2,7 @@ package com.nf.mvc.parameter.reference;
 
 import com.nf.mvc.Handler;
 import com.nf.mvc.HandlerContext;
+import com.nf.mvc.MethodParameter;
 import com.nf.mvc.ParameterProcessor;
 import com.nf.mvc.support.Order;
 
@@ -14,19 +15,14 @@ import java.lang.reflect.Parameter;
 
 @Order(3)
 public class ServletApiMethodArgumentResolver implements ParameterProcessor {
-    protected Parameter parameter;
-
-    protected Class<?> parameterType;
-
     @Override
-    public boolean supports(Parameter parameter) {
-        this.parameter = parameter;
-        this.parameterType = parameter.getType();
+    public boolean supports(MethodParameter methodParameter) {
+        Class<?> parameterType = methodParameter.getParamType();
 
-        return HttpServletRequest.class.isAssignableFrom(this.parameterType)||
-                HttpServletResponse.class.isAssignableFrom(this.parameterType)||
-                HttpSession.class.isAssignableFrom(this.parameterType)||
-                ServletContext.class.isAssignableFrom(this.parameterType);
+        return HttpServletRequest.class.isAssignableFrom(parameterType)||
+                HttpServletResponse.class.isAssignableFrom(parameterType)||
+                HttpSession.class.isAssignableFrom(parameterType)||
+                ServletContext.class.isAssignableFrom(parameterType);
     }
 
     /**
@@ -35,8 +31,8 @@ public class ServletApiMethodArgumentResolver implements ParameterProcessor {
      * request与response对象必须来自于DispatcherServlet的service
      */
     @Override
-    public Object processor(Handler handler, HttpServletRequest request)  throws IOException {
-        Class<?> paramType = this.parameterType;
+    public Object processor(MethodParameter methodParameter, HttpServletRequest request)  throws IOException {
+        Class<?> paramType = methodParameter.getParamType();
         HandlerContext context = HandlerContext.getContext();
         if (HttpServletRequest.class.isAssignableFrom(paramType)) {
             return request;

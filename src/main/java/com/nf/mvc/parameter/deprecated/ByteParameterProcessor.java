@@ -1,8 +1,8 @@
-package com.nf.mvc.parameter.basic;
+package com.nf.mvc.parameter.deprecated;
 
-import com.nf.mvc.AbstractParameterProcessor;
+import com.nf.mvc.parameter.AbstractDeprecatedParameterProcessor;
 
-public class ByteParameterProcessor extends AbstractParameterProcessor<Byte> {
+public class ByteParameterProcessor extends AbstractDeprecatedParameterProcessor<Byte> {
     @Override
     protected Class<? extends Byte> getType() {
         return Byte.class;

@@ -1,9 +1,9 @@
 package com.nf.mvc.parameter.reference;
 
-import com.nf.mvc.Handler;
-import com.nf.mvc.ParameterProcessor;
+import com.nf.mvc.MethodParameter;
 import com.nf.mvc.file.MultipartFile;
 import com.nf.mvc.file.StandardMultipartFile;
+import com.nf.mvc.parameter.AbstractParameterProcessor;
 import com.nf.mvc.support.Order;
 import com.nf.mvc.util.FileCopyUtils;
 
@@ -11,28 +11,17 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Part;
 import java.io.IOException;
-import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 @Order(4)
-public class MultipartFileMethodParameterProcessor implements ParameterProcessor {
-
-    protected Parameter parameter;
-
-    protected Class<?> parameterType;
-
-    /**
-     * @param parameter
-     * @return
-     */
+public class MultipartFileMethodParameterProcessor extends AbstractParameterProcessor {
     @Override
-    public boolean supports(Parameter parameter) {
-        this.parameter = parameter;
-        this.parameterType = parameter.getType();
-        return isFileType(this.parameterType)
-                || (this.parameterType.isArray() && isFileType(this.parameterType.getComponentType()));
+    public boolean supports(MethodParameter methodParameter) {
+        Class<?> parameterType = methodParameter.getParamType();
+        return isFileType(parameterType)
+                || (parameterType.isArray() && isFileType(parameterType.getComponentType()));
 //                || ReflectionUtils.isListOrSet(paramType) && isFileType();
     }
 
@@ -42,9 +31,9 @@ public class MultipartFileMethodParameterProcessor implements ParameterProcessor
     }
 
     @Override
-    public  Object processor(Handler handler, HttpServletRequest request) throws IOException, ServletException {
-        Class<?> paramType = this.parameterType;
-        String paramName = handler.getParamName(this.parameter);
+    public Object processor(MethodParameter methodParameter, HttpServletRequest request) throws IOException, ServletException {
+        Class<?> paramType = methodParameter.getParamType();
+        String paramName = this.getKey(methodParameter);
         if (paramType.isArray()) {
             return handleMultiFile(request.getParts(), paramType.getComponentType());
         } else {
@@ -57,7 +46,7 @@ public class MultipartFileMethodParameterProcessor implements ParameterProcessor
         List<?> files = new ArrayList<>();
         for (Part part : parts) {
             Object uploaded = handleSingleFile(part, fileType);
-           // files.add(uploaded);
+            // files.add(uploaded);
         }
         return files;
     }
@@ -74,6 +63,7 @@ public class MultipartFileMethodParameterProcessor implements ParameterProcessor
 
     /**
      * TODO:获取文件名的代码可以再改进一下
+     *
      * @param disposition
      * @return
      */

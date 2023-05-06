@@ -1,5 +1,6 @@
-package com.nf.mvc;
+package com.nf.mvc.parameter;
 
+import com.nf.mvc.MethodParameter;
 import com.nf.mvc.annotation.RequestParam;
 import com.nf.mvc.annotation.ValueConstants;
 import com.nf.mvc.exception.exceptions.NoAssignmentToPrimitiveIsNullException;
@@ -7,15 +8,21 @@ import com.nf.mvc.exception.exceptions.NoAssignmentToPrimitiveIsNullException;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Parameter;
 
-public abstract class AbstractParameterProcessor<T> implements ParameterProcessor {
+/**
+ * 该类及其子类被废弃，应该使用 SimpleTypeParameterProcessor 代替
+ * AbstractDeprecatedParameterProcessor 的所有实现类
+ * @param <T>
+ */
+@Deprecated
+public abstract class AbstractDeprecatedParameterProcessor<T> extends AbstractParameterProcessor {
 
     protected Parameter parameter;
 
     protected Class<?> parameterType;
 
     @Override
-    public boolean supports(Parameter parameter) {
-        this.parameter = parameter;
+    public boolean supports(MethodParameter methodParameter) {
+        this.parameter = methodParameter.getParameter();
         this.parameterType = parameter.getType();
         return this.isType(parameter);
     }
@@ -32,8 +39,8 @@ public abstract class AbstractParameterProcessor<T> implements ParameterProcesso
     protected boolean basicType(){return false;}
 
     @Override
-    public Object processor(Handler handler, HttpServletRequest req) {
-        String key = getKey(handler);
+    public Object processor(MethodParameter methodParameter, HttpServletRequest req) {
+        String key = getKey(methodParameter);
         if (this.parameterType.isArray()) {
             String[] strings = req.getParameterValues(key);
             return this.getConverts(strings);
@@ -54,17 +61,6 @@ public abstract class AbstractParameterProcessor<T> implements ParameterProcesso
             }
         }
         return value;
-    }
-
-    protected String getKey(Handler handler) {
-        String key = handler.getParamName(this.parameter);
-        if (this.parameter.isAnnotationPresent(RequestParam.class)) {
-            String value = this.parameter.getAnnotation(RequestParam.class).value();
-            if (!value.equals(ValueConstants.DEFAULT_NONE)) {
-                key = value;
-            }
-        }
-        return key;
     }
 
     protected abstract Object getConvert(String str);

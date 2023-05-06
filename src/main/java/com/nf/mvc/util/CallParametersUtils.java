@@ -26,20 +26,21 @@ public class CallParametersUtils {
 
         Object[] objects = new Object[parameterCount];
         for (int i = 0; i < parameterCount; i++) {
-            objects[i] = getObject(handler, parameters[i], req);
+            MethodParameter methodParameter = new MethodParameter(handler.getMethod(), i, handler.getParamName(parameters[i]),handler.getClz());
+            objects[i] = getObject(methodParameter, req);
         }
 
         return objects;
     }
 
-    public static Object getObject(Handler handler, Parameter parameter, HttpServletRequest req) throws IOException, ServletException {
+    public static Object getObject(MethodParameter methodParameter, HttpServletRequest req) throws IOException, ServletException {
         for (ParameterProcessor parameterProcessor : parameterProcessorList) {
-            if (parameterProcessor.supports(parameter)) {
-                return parameterProcessor.processor(handler, req);
+            if (parameterProcessor.supports(methodParameter)) {
+                return parameterProcessor.processor(methodParameter, req);
             }
         }
-        return new UnableToProcessTypeException("无法处理 " + parameter.getType() + " 类型的参数。可以添加 " +
-                ParameterProcessor.class + " 的实现类已支持 " + parameter.getType() + "参数的处理");
+        return new UnableToProcessTypeException("无法处理 " + methodParameter.getParamType() + " 类型的参数。可以添加 " +
+                ParameterProcessor.class + " 的实现类已支持 " + methodParameter.getParamType() + "参数的处理");
     }
 
 }

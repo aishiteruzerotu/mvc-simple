@@ -3,11 +3,13 @@ package com.nf.mvc.parameter.reference;
 import com.nf.Convert;
 import com.nf.Reflection;
 import com.nf.mvc.Handler;
+import com.nf.mvc.MethodParameter;
 import com.nf.mvc.ParameterProcessor;
 import com.nf.mvc.annotation.RequestParam;
 import com.nf.mvc.annotation.ValueConstants;
 import com.nf.mvc.exception.exceptions.NoAssignmentToPrimitiveIsNullException;
 import com.nf.mvc.exception.exceptions.UnableToProcessTypeException;
+import com.nf.mvc.parameter.AbstractParameterProcessor;
 import com.nf.mvc.support.Order;
 
 import javax.servlet.ServletException;
@@ -18,23 +20,17 @@ import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Set;
 
-@Order(0)
-public class SimpleTypeParameterProcessor implements ParameterProcessor {
-
-    protected Parameter parameter;
-
-    protected Class<?> parameterType;
-
+@Order(1)
+public class SimpleTypeParameterProcessor extends AbstractParameterProcessor {
     @Override
-    public boolean supports(Parameter parameter) {
-        this.parameter = parameter;
-        this.parameterType = parameter.getType();
-        if (Reflection.isSimpleProperty(this.parameterType)) {
+    public boolean supports(MethodParameter methodParameter) {
+        Class<?> parameterType = methodParameter.getParamType();
+        if (Reflection.isSimpleProperty(parameterType)) {
             return true;
         }
-        if (Reflection.isAssignableToAny(this.parameterType, Set.class, List.class)) {
+        if (Reflection.isAssignableToAny(parameterType, Set.class, List.class)) {
             // 只支持简单类型 List Set 集合
-            ParameterizedType parameterizedType = (ParameterizedType) this.parameter.getParameterizedType();
+            ParameterizedType parameterizedType = (ParameterizedType) methodParameter.getParameter().getParameterizedType();
             Class<?> genericType = (Class<?>) parameterizedType.getActualTypeArguments()[0];
             return Reflection.isSimpleType(genericType);
         }
@@ -42,11 +38,15 @@ public class SimpleTypeParameterProcessor implements ParameterProcessor {
     }
 
     @Override
-    public Object processor(Handler handler, HttpServletRequest req) throws IOException, ServletException {
+    public Object processor(MethodParameter methodParameter, HttpServletRequest req) throws IOException, ServletException {
+
+        //获取参数对象
+        Parameter parameter = methodParameter.getParameter();
+
         Object value;
-        String paramName = getKey(handler);
+        String paramName = getKey(methodParameter);
         //获取参数类型
-        Class<?> paramType = this.parameterType;
+        Class<?> paramType = methodParameter.getParamType();
         //转换为数组、集合、或具体类型的值
         try {
             if (paramType.isArray()) {
@@ -54,7 +54,7 @@ public class SimpleTypeParameterProcessor implements ParameterProcessor {
                 value = Convert.toSimpleTypeArray(componentType, req.getParameterValues(paramName));
             } else if (List.class.isAssignableFrom(paramType) || Set.class.isAssignableFrom(paramType)) {
                 //获取集合泛型参数类型
-                ParameterizedType type = (ParameterizedType) this.parameter.getParameterizedType();
+                ParameterizedType type = (ParameterizedType) parameter.getParameterizedType();
                 Class<?> genericType = (Class<?>) type.getActualTypeArguments()[0];
                 value = Convert.toSimpleCollection(paramType, genericType, req.getParameterValues(paramName));
             } else {
@@ -68,10 +68,10 @@ public class SimpleTypeParameterProcessor implements ParameterProcessor {
                     throw new NoAssignmentToPrimitiveIsNullException("不能把null给简单类型");
                 }
 
-                if (value == null && this.parameter.isAnnotationPresent(RequestParam.class)) {
-                    String defaultValue = this.parameter.getDeclaredAnnotation(RequestParam.class).defaultValue();
+                if (value == null && parameter.isAnnotationPresent(RequestParam.class)) {
+                    String defaultValue = parameter.getDeclaredAnnotation(RequestParam.class).defaultValue();
                     if (!defaultValue.equals(ValueConstants.DEFAULT_NONE)) {
-                        value = defaultValue;
+                        value = Convert.toSimpleTypeValue(paramType,defaultValue);
                     }
                 }
             }
@@ -79,16 +79,5 @@ public class SimpleTypeParameterProcessor implements ParameterProcessor {
             return new UnableToProcessTypeException("无法转换值异常");
         }
         return value;
-    }
-
-    protected String getKey(Handler handler) {
-        String key = handler.getParamName(this.parameter);
-        if (this.parameter.isAnnotationPresent(RequestParam.class)) {
-            String value = this.parameter.getAnnotation(RequestParam.class).value();
-            if (!value.equals(ValueConstants.DEFAULT_NONE)) {
-                key = value;
-            }
-        }
-        return key;
     }
 }

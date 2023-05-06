@@ -142,7 +142,7 @@ public class MvcContext {
         this.defaultHandlerAdapters.add(new HttpRequestHandlerAdapter());
         this.defaultHandlerAdapters.add(new MethodNameHandlerAdapter());
 
-        ScanResult scanResult = ScanUtils.scan("com.nf.mvc.parameter");
+        ScanResult scanResult = ScanUtils.scan("com.nf.mvc.parameter.reference");
         ClassInfoList allClasses = scanResult.getAllClasses();
         for (ClassInfo classInfo : allClasses) {
             Class<?> scanedClass = classInfo.loadClass();

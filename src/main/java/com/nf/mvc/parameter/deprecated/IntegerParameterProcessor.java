@@ -1,10 +1,10 @@
-package com.nf.mvc.parameter.basic;
+package com.nf.mvc.parameter.deprecated;
 
-import com.nf.mvc.AbstractParameterProcessor;
+import com.nf.mvc.parameter.AbstractDeprecatedParameterProcessor;
 
 import java.util.Arrays;
 
-public class IntegerParameterProcessor extends AbstractParameterProcessor<Integer> {
+public class IntegerParameterProcessor extends AbstractDeprecatedParameterProcessor<Integer> {
     @Override
     protected Class<? extends Integer> getType() {
         return Integer.class;

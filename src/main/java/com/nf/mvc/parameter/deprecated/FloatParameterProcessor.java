@@ -1,8 +1,8 @@
-package com.nf.mvc.parameter.basic;
+package com.nf.mvc.parameter.deprecated;
 
-import com.nf.mvc.AbstractParameterProcessor;
+import com.nf.mvc.parameter.AbstractDeprecatedParameterProcessor;
 
-public class FloatParameterProcessor extends AbstractParameterProcessor<Float> {
+public class FloatParameterProcessor extends AbstractDeprecatedParameterProcessor<Float> {
     @Override
     protected Class<? extends Float> getType() {
         return Float.class;

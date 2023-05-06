@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.lang.reflect.Parameter;
 
 public interface ParameterProcessor {
-    boolean supports(Parameter parameter);
+    boolean supports(MethodParameter methodParameter);
 
-    Object processor(Handler handler, HttpServletRequest req) throws IOException, ServletException;
+    Object processor(MethodParameter methodParameter, HttpServletRequest req) throws IOException, ServletException;
 }

@@ -1,13 +1,11 @@
-package com.nf.mvc.parameter.reference;
+package com.nf.mvc.parameter.deprecated;
 
-import com.nf.mvc.support.Order;
-import com.nf.mvc.AbstractParameterProcessor;
+import com.nf.mvc.parameter.AbstractDeprecatedParameterProcessor;
 
 /**
  * Parameter 的类型是 String 类型的则不需要任何处理
  */
-@Order(1)
-public class StringParameterProcessor extends AbstractParameterProcessor<String> {
+public class StringParameterProcessor extends AbstractDeprecatedParameterProcessor<String> {
     @Override
     protected Class<? extends String> getType() {
         return String.class;

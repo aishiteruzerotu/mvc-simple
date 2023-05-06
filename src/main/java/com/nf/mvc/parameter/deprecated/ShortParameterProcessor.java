@@ -1,8 +1,8 @@
-package com.nf.mvc.parameter.basic;
+package com.nf.mvc.parameter.deprecated;
 
-import com.nf.mvc.AbstractParameterProcessor;
+import com.nf.mvc.parameter.AbstractDeprecatedParameterProcessor;
 
-public class ShortParameterProcessor extends AbstractParameterProcessor<Short> {
+public class ShortParameterProcessor extends AbstractDeprecatedParameterProcessor<Short> {
     @Override
     protected Class<? extends Short> getType() {
         return Short.class;

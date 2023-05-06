@@ -1,10 +1,10 @@
-package com.nf.mvc.parameter.basic;
+package com.nf.mvc.parameter.deprecated;
 
-import com.nf.mvc.AbstractParameterProcessor;
+import com.nf.mvc.parameter.AbstractDeprecatedParameterProcessor;
 
 import java.util.Arrays;
 
-public class LongParameterProcessor extends AbstractParameterProcessor<Long> {
+public class LongParameterProcessor extends AbstractDeprecatedParameterProcessor<Long> {
     @Override
     protected Class<? extends Long> getType() {
         return Long.class;

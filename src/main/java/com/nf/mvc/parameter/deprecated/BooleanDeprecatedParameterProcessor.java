@@ -1,8 +1,8 @@
-package com.nf.mvc.parameter.basic;
+package com.nf.mvc.parameter.deprecated;
 
-import com.nf.mvc.AbstractParameterProcessor;
+import com.nf.mvc.parameter.AbstractDeprecatedParameterProcessor;
 
-public class BooleanParameterProcessor extends AbstractParameterProcessor<Boolean> {
+public class BooleanDeprecatedParameterProcessor extends AbstractDeprecatedParameterProcessor<Boolean> {
     @Override
     protected Class<? extends Boolean> getType() {
         return Boolean.class;
