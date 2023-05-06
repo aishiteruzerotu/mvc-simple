@@ -150,6 +150,7 @@ public class MvcContext {
             this.defaultParameterProcessors.add(exceptionResolver);
         }
         this.defaultParameterProcessors.sort(new OrderComparator<>());
+        this.defaultExceptionResolvers.add(new ExceptionHandlerExceptionResolver());
 
         this.defaultExceptionResolvers.add(new ExceptionHandlerExceptionResolver());
         this.defaultExceptionResolvers.add(new PrintStackTraceHandlerExceptionResolver());
