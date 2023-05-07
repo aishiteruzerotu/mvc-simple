@@ -22,7 +22,7 @@ public class BeanParameterProcessor implements ParameterProcessor {
 
     private boolean isPackage(Class<?> paramType) {
         try {
-            return ((Class) paramType.getField("TYPE").get(null)).isPrimitive();
+            return ((Class<?>) paramType.getField("TYPE").get(null)).isPrimitive();
         } catch (Exception e) {
             return false;
         }
