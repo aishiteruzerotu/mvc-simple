@@ -105,7 +105,7 @@ public class MvcContext {
         this.setList(ParameterProcessor.class, scanedClass, this.customParameterProcessors);
         this.setList(HandlerExceptionResolver.class, scanedClass, this.customExceptionResolvers);
         this.setList(HandlerInterceptor.class, scanedClass, this.customHandlerInterceptors);
-        this.setList(WebMvcConfigurer.class,scanedClass,this.customWebMvcConfigurer);
+        this.setList(WebMvcConfigurer.class, scanedClass, this.customWebMvcConfigurer);
     }
 
     private <T> void setList(Class<? extends T> clz, Class<?> scanedClass, List<T> arr) {
@@ -211,8 +211,11 @@ public class MvcContext {
     }
 
     public WebMvcConfigurer getCustomWebMvcConfigurer() {
-        if (customWebMvcConfigurer.size() !=1) {
+        if (customWebMvcConfigurer.size() > 1) {
             throw new IllegalStateException("配置器应该只写一个");
+        }
+        if (customWebMvcConfigurer.size() == 0) {
+            return new WebMvcConfigurer() {};
         }
         return customWebMvcConfigurer.get(0);
     }

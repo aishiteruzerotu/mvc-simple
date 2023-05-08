@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 @MultipartConfig
 public class DispatcherServlet extends HttpServlet {
@@ -62,10 +63,8 @@ public class DispatcherServlet extends HttpServlet {
         webMvcConfigurer.configureCors(corsConfiguration);
     }
 
-    protected <T> void config(List<T> list, HandlerWebMvcConfigurer<T> handlerWebMvcConfigurer){
-        for (T t : list) {
-            handlerWebMvcConfigurer.config(t);
-        }
+    protected <T> void config(List<T> list, Consumer<T> action){
+        list.forEach(action);
     }
 
     protected void initSetScanResult(ServletConfig config) {
