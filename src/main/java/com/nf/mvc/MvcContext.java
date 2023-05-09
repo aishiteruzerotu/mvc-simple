@@ -211,13 +211,12 @@ public class MvcContext {
     }
 
     public WebMvcConfigurer getCustomWebMvcConfigurer() {
-        if (customWebMvcConfigurer.size() > 1) {
+        if (this.customWebMvcConfigurer.size() > 1) {
             throw new IllegalStateException("配置器应该只写一个");
         }
-        if (customWebMvcConfigurer.size() == 0) {
-            return new WebMvcConfigurer() {};
-        }
-        return customWebMvcConfigurer.get(0);
+        return this.customWebMvcConfigurer.size() == 0 ?
+                new WebMvcConfigurer() {} :
+                this.customWebMvcConfigurer.get(0);
     }
     //endregion
 

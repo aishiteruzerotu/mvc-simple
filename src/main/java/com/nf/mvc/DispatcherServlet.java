@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 @MultipartConfig
@@ -320,7 +321,7 @@ public class DispatcherServlet extends HttpServlet {
 
     protected String getUri(HttpServletRequest req) {
         String contextPath = req.getContextPath();
-        return req.getRequestURI().substring(contextPath.length());
+        return req.getRequestURI().substring(contextPath.length()).toLowerCase(Locale.ROOT);
     }
 
     protected Handler getHandler(String uri) throws Exception {
