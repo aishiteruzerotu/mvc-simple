@@ -76,7 +76,7 @@ public class SimpleTypeParameterProcessor extends AbstractParameterProcessor {
                 }
             }
         } catch (Exception e) {
-            return new UnableToProcessTypeException("无法转换值异常");
+            return new UnableToProcessTypeException("无法转换值异常",e);
         }
         return value;
     }

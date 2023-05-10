@@ -21,7 +21,7 @@ public class HandlerInvokeUtils {
                 obj = method.invoke(instance, args);
             }
         } catch (Exception e) {
-            throw new UnableToExecuteException("无法调用 "+ method +" 方法 "+e.getMessage());
+            throw new UnableToExecuteException("无法调用 "+ method +" 方法 "+e.getMessage(),e);
         }
         return ResultViewResult.getViewResult(obj);
     }
