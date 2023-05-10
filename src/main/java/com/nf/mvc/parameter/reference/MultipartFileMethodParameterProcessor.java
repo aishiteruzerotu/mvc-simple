@@ -3,9 +3,8 @@ package com.nf.mvc.parameter.reference;
 import com.nf.mvc.MethodParameter;
 import com.nf.mvc.file.MultipartFile;
 import com.nf.mvc.file.StandardMultipartFile;
-import com.nf.mvc.parameter.AbstractParameterProcessor;
+import com.nf.mvc.parameter.AbstractMultipartFileMethodParameterProcessor;
 import com.nf.mvc.support.Order;
-import com.nf.mvc.util.FileCopyUtils;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -16,60 +15,55 @@ import java.util.Collection;
 import java.util.List;
 
 @Order(4)
-public class MultipartFileMethodParameterProcessor extends AbstractParameterProcessor {
+public class MultipartFileMethodParameterProcessor extends AbstractMultipartFileMethodParameterProcessor {
+
     @Override
-    public boolean supports(MethodParameter methodParameter) {
-        Class<?> parameterType = methodParameter.getParamType();
-        return isFileType(parameterType)
-                || (parameterType.isArray() && isFileType(parameterType.getComponentType()));
-//                || ReflectionUtils.isListOrSet(paramType) && isFileType();
+    protected boolean supportsInternal(Class<?> type) {
+        return this.isFileType(type);
     }
 
-    private boolean isFileType(Class<?> fileType) {
+    protected Object resolveArgumentInternal(Class<?> type, Object parameterValue, MethodParameter methodParameter) throws ServletException,IOException {
+        //压根没有上传数据时，parameterValue就是null，这个时候直接返回null即可
+        if (parameterValue == null) {
+            return null;
+        }
+
+        return this.handleSingleFile((Part) parameterValue,type);
+    }
+
+
+    protected Object[] getSource(MethodParameter methodParameter, HttpServletRequest request) {
+        Object[] source = null;
+        try {
+            List<Part> matchedParts = new ArrayList<>();
+            Collection<Part> parts = request.getParts();
+            for (Part part : parts) {
+                if (part.getName().equals(methodParameter.getParamName())) {
+                    matchedParts.add(part);
+                }
+            }
+            source = matchedParts.toArray();
+        } catch (IOException  | ServletException e) {
+            //这里不抛出异常，什么也不干，相当于返回null，针对的一种场景是：比如修改商品记录不牵涉到图片的修改，
+            //那么文件类型的参数就直接赋值为null即可，抛异常的话会中断控制器方法的执行
+        }
+        return source;
+    }
+
+    protected boolean isFileType(Class<?> fileType) {
         return Part.class == fileType ||
                 MultipartFile.class == fileType;
     }
 
-    @Override
-    public Object processor(MethodParameter methodParameter, HttpServletRequest request) throws IOException, ServletException {
-        Class<?> paramType = methodParameter.getParamType();
-        String paramName = this.getKey(methodParameter);
-        if (paramType.isArray()) {
-            return handleMultiFile(request.getParts(), paramType.getComponentType());
-        } else {
-            return handleSingleFile(request.getPart(paramName), paramType);
-        }
-
-    }
-
-    private List<?> handleMultiFile(Collection<Part> parts, Class<?> fileType) {
-        List<?> files = new ArrayList<>();
-        for (Part part : parts) {
-            Object uploaded = handleSingleFile(part, fileType);
-            // files.add(uploaded);
-        }
-        return files;
-    }
-
-    private Object handleSingleFile(Part part, Class<?> paramType) {
+    protected  <T> T handleSingleFile(Part part, Class<T> paramType) {
         if (Part.class == paramType) {
-            return part;
+            return (T) part;
         } else {
-            String disposition = part.getHeader(FileCopyUtils.CONTENT_DISPOSITION);
-            String filename = getFileName(disposition);
-            return new StandardMultipartFile(part, filename);
+            return (T) new StandardMultipartFile(part, getFileName(part));
         }
     }
 
-    /**
-     * TODO:获取文件名的代码可以再改进一下
-     *
-     * @param disposition
-     * @return
-     */
-    private String getFileName(String disposition) {
-        String fileName = disposition.substring(disposition.indexOf("filename=\"") + 10, disposition.lastIndexOf("\""));
-        System.out.println(fileName);
-        return fileName;
+    protected String getFileName(Part part) {
+        return part.getSubmittedFileName();
     }
 }

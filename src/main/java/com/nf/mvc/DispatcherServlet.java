@@ -195,7 +195,7 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     protected void doService(HttpServletRequest req, HttpServletResponse resp) {
-        String uri = this.getUri(req);
+        String uri = this.getUri(req).toLowerCase(Locale.ROOT);
         HandlerContext context = HandlerContext.getContext();
         context.setRequest(req).setResponse(resp);
         try {
@@ -321,7 +321,7 @@ public class DispatcherServlet extends HttpServlet {
 
     protected String getUri(HttpServletRequest req) {
         String contextPath = req.getContextPath();
-        return req.getRequestURI().substring(contextPath.length()).toLowerCase(Locale.ROOT);
+        return req.getRequestURI().substring(contextPath.length());
     }
 
     protected Handler getHandler(String uri) throws Exception {
