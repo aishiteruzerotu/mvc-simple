@@ -3,7 +3,6 @@ package com.nf.mvc;
 import com.nf.Reflection;
 import com.nf.mvc.annotation.RequestParam;
 import com.nf.mvc.annotation.ValueConstants;
-import com.nf.mvc.util.ReflectionUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -46,11 +45,11 @@ public class MethodParameter {
     }
 
     public String getParamName() {
-        // ²ÎÊıÉÏÓĞ×¢½â£¬¿ÉÄÜÖ»ÊÇÓÃÀ´ÉèÖÃÄ¬ÈÏÖµ£¬Ã»ÓĞÉèÖÃvalue
+        // å‚æ•°ä¸Šæœ‰æ³¨è§£ï¼Œå¯èƒ½åªæ˜¯ç”¨æ¥è®¾ç½®é»˜è®¤å€¼ï¼Œæ²¡æœ‰è®¾ç½®value
         if(getParameter().isAnnotationPresent(RequestParam.class) ){
             String value = getParameter().getDeclaredAnnotation(RequestParam.class).value();
-            // Ã»ÓĞÉèÖÃvalue£¬value¾Í»á±£ÁôÄ¬ÈÏÖµ£¬Õâ¸öÖµÎÒÃÇ²»²ÉÓÃ£¬ÈÔÈ»ÓÃ·½·¨µÄ²ÎÊıÃû£¨javassist½âÎö³öÀ´µÄ
-            // Èç¹ûÄãÓĞ×¢½â£¬²¢ÇÒÉèÖÃÁËvalue£¬ÎÒÃÇ²Å²ÉÓÃvalueÊôĞÔµÄÖµ×÷Îª²ÎÊıÃû
+            // æ²¡æœ‰è®¾ç½®valueï¼Œvalueå°±ä¼šä¿ç•™é»˜è®¤å€¼ï¼Œè¿™ä¸ªå€¼æˆ‘ä»¬ä¸é‡‡ç”¨ï¼Œä»ç„¶ç”¨æ–¹æ³•çš„å‚æ•°åï¼ˆjavassistè§£æå‡ºæ¥çš„
+            // å¦‚æœä½ æœ‰æ³¨è§£ï¼Œå¹¶ä¸”è®¾ç½®äº†valueï¼Œæˆ‘ä»¬æ‰é‡‡ç”¨valueå±æ€§çš„å€¼ä½œä¸ºå‚æ•°å
             if (value.equals(ValueConstants.DEFAULT_NONE) == false) {
                 this.paramName = value;
             }
@@ -77,7 +76,7 @@ public class MethodParameter {
     public Object getDefaultValue() {
         if ( getParameter().isAnnotationPresent(RequestParam.class)) {
             String defaultValue = getParameter().getDeclaredAnnotation(RequestParam.class).defaultValue();
-            //ÓÃ»§¿ÉÄÜÖ»ÊÇÀûÓÃRequestParamÉèÖÃÁË²ÎÊıÃû×Ö£¬Ã»ÓĞÉèÖÃÄ¬ÈÏÖµ
+            //ç”¨æˆ·å¯èƒ½åªæ˜¯åˆ©ç”¨RequestParamè®¾ç½®äº†å‚æ•°åå­—ï¼Œæ²¡æœ‰è®¾ç½®é»˜è®¤å€¼
             if (!defaultValue.equals(ValueConstants.DEFAULT_NONE)) {
                 return defaultValue;
             }
@@ -89,7 +88,7 @@ public class MethodParameter {
         if (isArray()) {
             return getParamType().getComponentType();
         }
-        throw new IllegalStateException("²»ÊÇÊı×é£¬ÎŞ·¨»ñÈ¡×é¼şÀàĞÍ");
+        throw new IllegalStateException("ä¸æ˜¯æ•°ç»„ï¼Œæ— æ³•è·å–ç»„ä»¶ç±»å‹");
     }
 
     public Class<?> getFirstActualTypeArgument() {
@@ -101,7 +100,7 @@ public class MethodParameter {
     }
 
     /**
-     * ´Ë·½·¨ÊÇÓÃÀ´»ñÈ¡·½·¨·ºĞÍ²ÎÊıµÄÀàĞÍÊµ²ÎµÄ
+     * æ­¤æ–¹æ³•æ˜¯ç”¨æ¥è·å–æ–¹æ³•æ³›å‹å‚æ•°çš„ç±»å‹å®å‚çš„
      * @return
      */
     public  Class[] getActualArguments() {
@@ -110,16 +109,16 @@ public class MethodParameter {
 
     @Override
     public boolean equals(Object other) {
-        //1.×Ô¼ºÓëÆäËüÊÇÍ¬Ò»¸ö£¨==£©¶ÔÏó£¬ÄÇÃ´¿Ï¶¨ÏàµÈ
+        //1.è‡ªå·±ä¸å…¶å®ƒæ˜¯åŒä¸€ä¸ªï¼ˆ==ï¼‰å¯¹è±¡ï¼Œé‚£ä¹ˆè‚¯å®šç›¸ç­‰
         if (this == other) {
             return true;
         }
-        //2.±ğÈË¸úÎÒ¸ù±¾²»ÊÇÍ¬Ò»¸öÀàĞÍ¡£ËùÒÔ¾ÍÒ»¶¨²»ÏàµÈ
+        //2.åˆ«äººè·Ÿæˆ‘æ ¹æœ¬ä¸æ˜¯åŒä¸€ä¸ªç±»å‹ã€‚æ‰€ä»¥å°±ä¸€å®šä¸ç›¸ç­‰
         if (!(other instanceof MethodParameter)) {
             return false;
         }
-        //3.´úÂëµ½ÕâÀï£¬¾ÍÒâÎ¶×Å¾ø²»ÊÇÍ¬Ò»¸ö¶ÔÏó£¬µ«ÀàĞÍÊÇÒ»ÑùµÄ
-        //²ÎÊıÎ»ÖÃÒ»Ñù£¬ËùÔÚ·½·¨Ò»Ñù£¬ËùÔÚÀàÒ»Ñù
+        //3.ä»£ç åˆ°è¿™é‡Œï¼Œå°±æ„å‘³ç€ç»ä¸æ˜¯åŒä¸€ä¸ªå¯¹è±¡ï¼Œä½†ç±»å‹æ˜¯ä¸€æ ·çš„
+        //å‚æ•°ä½ç½®ä¸€æ ·ï¼Œæ‰€åœ¨æ–¹æ³•ä¸€æ ·ï¼Œæ‰€åœ¨ç±»ä¸€æ ·
         MethodParameter otherParam = (MethodParameter) other;
         return (getContainingClass() == otherParam.getContainingClass() &&
                 this.parameterIndex == otherParam.parameterIndex &&
