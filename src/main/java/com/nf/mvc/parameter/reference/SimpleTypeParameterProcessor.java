@@ -64,9 +64,6 @@ public class SimpleTypeParameterProcessor extends AbstractParameterProcessor {
 
                 //toSimpleTypeValue方法的实现，是转换出了异常就返回null
                 value = Convert.toSimpleTypeValue(paramType, req.getParameter(paramName));
-                if (value == null && Reflection.isPrimitive(paramType)) {
-                    throw new NoAssignmentToPrimitiveIsNullException("不能把null给简单类型");
-                }
 
                 if (value == null && parameter.isAnnotationPresent(RequestParam.class)) {
                     String defaultValue = parameter.getDeclaredAnnotation(RequestParam.class).defaultValue();
@@ -74,6 +71,11 @@ public class SimpleTypeParameterProcessor extends AbstractParameterProcessor {
                         value = Convert.toSimpleTypeValue(paramType,defaultValue);
                     }
                 }
+
+                if (value == null && Reflection.isPrimitive(paramType)) {
+                    throw new NoAssignmentToPrimitiveIsNullException("不能把null给简单类型");
+                }
+
             }
         } catch (Exception e) {
             return new UnableToProcessTypeException("无法转换值异常",e);
