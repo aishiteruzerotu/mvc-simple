@@ -6,7 +6,7 @@ import io.github.classgraph.ScanResult;
 public class ScanUtils {
     private ScanUtils(){}
 
-    public static ScanResult scan(String scanPackage){
+    public static ScanResult scan(String... scanPackage){
         ClassGraph classGraph = new ClassGraph();
         classGraph.enableAllInfo();
         classGraph.acceptPackages(scanPackage);

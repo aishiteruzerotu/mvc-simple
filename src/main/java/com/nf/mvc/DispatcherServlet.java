@@ -16,9 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 @MultipartConfig
 public class DispatcherServlet extends HttpServlet {
@@ -41,13 +43,17 @@ public class DispatcherServlet extends HttpServlet {
         this.initSetScanResult(config);
 
         //初始化配置
+        this.initMvc();
+
+        //初始化用户配置修改
+        this.initConfigurer();
+    }
+
+    protected void initMvc() {
         this.initHandlerMappings();
         this.initHandlerAdapters();
         this.initParameterProcessors();
         this.initExceptionResolvers();
-
-        //初始化用户配置修改
-        this.initConfigurer();
     }
 
     protected void initConfigurer(){
@@ -69,17 +75,19 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     protected void initSetScanResult(ServletConfig config) {
-        String scanPackage = this.getInitParameter(config);
+        String[] scanPackage = this.getInitParameter(config);
         ScanResult scanResult = ScanUtils.scan(scanPackage);
         this.initMvcContext(scanResult);
     }
 
-    protected String getInitParameter(ServletConfig config) {
+    protected String[] getInitParameter(ServletConfig config) {
         String initParameter = config.getInitParameter(COMPONENT_SCAN);
         if (initParameter == null || initParameter.isEmpty()) {
             throw new RuntimeException("找不到需要扫描的包");
         }
-        return initParameter;
+        //对多包扫描进行支持
+        String[] parameters = initParameter.trim().split("[\\s,;]+");
+        return Arrays.stream(parameters).filter(s -> !s.isEmpty()).toList().toArray(new String[]{});
     }
 
     private void initMvcContext(ScanResult scanResult) {

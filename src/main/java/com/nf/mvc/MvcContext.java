@@ -23,7 +23,7 @@ public class MvcContext {
 
     private static final MvcContext instance = new MvcContext();
 
-    private static final OrderComparator ORDER_COMPARATOR = new OrderComparator<>();
+    private static final OrderComparator<Object> ORDER_COMPARATOR = new OrderComparator<>();
 
     private ScanResult scanResult;
 
@@ -77,7 +77,7 @@ public class MvcContext {
      * 也有Handler
      * 因为一般不会写一个类，实现多个接口，所以这种多个if写法问题不大
      *
-     * @param scanResult
+     * @param scanResult 扫描到的类
      */
     void config(ScanResult scanResult) {
 
@@ -88,10 +88,11 @@ public class MvcContext {
 
             setList(scanedClass);
 
+            //加载所有的需要类到虚拟机
             allScanedClasses.add(scanedClass);
         }
 
-        //排序操作
+        //对用户提供的依赖类进行排序排序操作
         this.customHandlerMappings.sort(ORDER_COMPARATOR);
         this.customHandlerAdapters.sort(ORDER_COMPARATOR);
         this.customParameterProcessors.sort(ORDER_COMPARATOR);
@@ -100,15 +101,15 @@ public class MvcContext {
     }
 
     private void setList(Class<?> scanedClass) {
-        this.setList(HandlerMapping.class, scanedClass, this.customHandlerMappings);
-        this.setList(HandlerAdapter.class, scanedClass, this.customHandlerAdapters);
-        this.setList(ParameterProcessor.class, scanedClass, this.customParameterProcessors);
-        this.setList(HandlerExceptionResolver.class, scanedClass, this.customExceptionResolvers);
-        this.setList(HandlerInterceptor.class, scanedClass, this.customHandlerInterceptors);
-        this.setList(WebMvcConfigurer.class, scanedClass, this.customWebMvcConfigurer);
+        this.setList(scanedClass, HandlerMapping.class, this.customHandlerMappings);
+        this.setList(scanedClass, HandlerAdapter.class, this.customHandlerAdapters);
+        this.setList(scanedClass, ParameterProcessor.class, this.customParameterProcessors);
+        this.setList(scanedClass, HandlerExceptionResolver.class, this.customExceptionResolvers);
+        this.setList(scanedClass, HandlerInterceptor.class, this.customHandlerInterceptors);
+        this.setList(scanedClass, WebMvcConfigurer.class, this.customWebMvcConfigurer);
     }
 
-    private <T> void setList(Class<? extends T> clz, Class<?> scanedClass, List<T> arr) {
+    private <T> void setList(Class<?> scanedClass, Class<? extends T> clz, List<T> arr) {
         if (clz.isAssignableFrom(scanedClass)) {
             T exceptionResolver = (T) ReflectionUtils.newInstance(scanedClass);
             arr.add(exceptionResolver);
@@ -215,7 +216,8 @@ public class MvcContext {
             throw new IllegalStateException("配置器应该只写一个");
         }
         return this.customWebMvcConfigurer.size() == 0 ?
-                new WebMvcConfigurer() {} :
+                new WebMvcConfigurer() {
+                } :
                 this.customWebMvcConfigurer.get(0);
     }
     //endregion
