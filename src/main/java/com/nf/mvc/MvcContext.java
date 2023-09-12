@@ -15,6 +15,8 @@ import io.github.classgraph.ClassInfo;
 import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -101,12 +103,19 @@ public class MvcContext {
     }
 
     private void setList(Class<?> scanedClass) {
-        this.setList(scanedClass, HandlerMapping.class, this.customHandlerMappings);
-        this.setList(scanedClass, HandlerAdapter.class, this.customHandlerAdapters);
-        this.setList(scanedClass, ParameterProcessor.class, this.customParameterProcessors);
-        this.setList(scanedClass, HandlerExceptionResolver.class, this.customExceptionResolvers);
-        this.setList(scanedClass, HandlerInterceptor.class, this.customHandlerInterceptors);
-        this.setList(scanedClass, WebMvcConfigurer.class, this.customWebMvcConfigurer);
+        this.setList(scanedClass, this.customHandlerMappings);
+        this.setList(scanedClass, this.customHandlerAdapters);
+        this.setList(scanedClass, this.customParameterProcessors);
+        this.setList(scanedClass, this.customExceptionResolvers);
+        this.setList(scanedClass, this.customHandlerInterceptors);
+        this.setList(scanedClass, this.customWebMvcConfigurer);
+
+//        this.setList(scanedClass, HandlerMapping.class, this.customHandlerMappings);
+//        this.setList(scanedClass, HandlerAdapter.class, this.customHandlerAdapters);
+//        this.setList(scanedClass, ParameterProcessor.class, this.customParameterProcessors);
+//        this.setList(scanedClass, HandlerExceptionResolver.class, this.customExceptionResolvers);
+//        this.setList(scanedClass, HandlerInterceptor.class, this.customHandlerInterceptors);
+//        this.setList(scanedClass, WebMvcConfigurer.class, this.customWebMvcConfigurer);
     }
 
     private <T> void setList(Class<?> scanedClass, Class<? extends T> clz, List<T> arr) {
@@ -114,6 +123,20 @@ public class MvcContext {
             T exceptionResolver = (T) ReflectionUtils.newInstance(scanedClass);
             arr.add(exceptionResolver);
         }
+    }
+
+    // TODO: 待解决集合对象获取泛型参数
+    private <T> void setList(Class<?> scanedClass, List<T> arr) {
+        if (this.isListGenericity(scanedClass, arr)) {
+            T exceptionResolver = (T) ReflectionUtils.newInstance(scanedClass);
+            arr.add(exceptionResolver);
+        }
+    }
+
+    private boolean isListGenericity(Class<?> scanedClass, List<?> arr) {
+        ParameterizedType parameterizedType = (ParameterizedType) arr.getClass().getGenericSuperclass();
+        Class<?> arrClass = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+        return arrClass.isAssignableFrom(scanedClass);
     }
 
     ScanResult getScanResult() {
