@@ -26,10 +26,8 @@ public class MethodRequestMappingHandlerMapping extends AbstractHandlerMapping {
      * @param clz 类对象
      * @param method 方法对象
      * @param uri 请求映射
-     * @return 假
      */
     @Override
-    protected boolean isNullURIMapping(Class<?> clz, Method method, String uri) {
-        return false;
+    protected void checkNullURIMapping(Class<?> clz, Method method, String uri) {
     }
 }

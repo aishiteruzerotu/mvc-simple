@@ -56,21 +56,21 @@ public class DispatcherServlet extends HttpServlet {
         this.initExceptionResolvers();
     }
 
-    protected void initConfigurer(){
+    protected void initConfigurer() {
         WebMvcConfigurer webMvcConfigurer = MVC_CONTEXT.getCustomWebMvcConfigurer();
 
         //基本框架组件配置
-        this.config(handlerMappings,webMvcConfigurer::configureHandlerMapping);
-        this.config(handlerAdapters,webMvcConfigurer::configureHandlerAdapter);
-        this.config(parameterProcessors,webMvcConfigurer::configureArgumentResolver);
-        this.config(exceptionResolvers,webMvcConfigurer::configureExceptionResolver);
+        this.config(handlerMappings, webMvcConfigurer::configureHandlerMapping);
+        this.config(handlerAdapters, webMvcConfigurer::configureHandlerAdapter);
+        this.config(parameterProcessors, webMvcConfigurer::configureArgumentResolver);
+        this.config(exceptionResolvers, webMvcConfigurer::configureExceptionResolver);
 
         //先设定默认设置，如果用户不需要这些默认设置，可以调用clearDefaultConfiguration方法进行清除
         corsConfiguration.applyDefaultConfiguration();
         webMvcConfigurer.configureCors(corsConfiguration);
     }
 
-    protected <T> void config(List<T> list, Consumer<T> action){
+    protected <T> void config(List<T> list, Consumer<T> action) {
         list.forEach(action);
     }
 
@@ -203,13 +203,12 @@ public class DispatcherServlet extends HttpServlet {
     }
 
     protected void doService(HttpServletRequest req, HttpServletResponse resp) {
-        String uri = this.getUri(req).toLowerCase(Locale.ROOT);
         HandlerContext context = HandlerContext.getContext();
         context.setRequest(req).setResponse(resp);
         try {
-            Handler handler = this.getHandler(uri);
+            Handler handler = this.getHandler(req);
             if (handler != null) {
-                HandlerExecutionChain handlerExecutionChain = this.getHandlerExecutionChain(handler, uri);
+                HandlerExecutionChain handlerExecutionChain = this.getHandlerExecutionChain(handler, req);
                 this.doDispatch(req, resp, handlerExecutionChain);
             } else {
                 this.noHandlerFound(req, resp);
@@ -222,8 +221,8 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    protected HandlerExecutionChain getHandlerExecutionChain(Handler handler, String uri) {
-        return new HandlerExecutionChain(handler, this.handlerInterceptorMapping.getHandlerInterceptors(uri));
+    protected HandlerExecutionChain getHandlerExecutionChain(Handler handler, HttpServletRequest req) {
+        return new HandlerExecutionChain(handler, this.handlerInterceptorMapping.getHandlerInterceptors(req));
     }
 
     /**
@@ -272,7 +271,7 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    protected void rejectRequest(HttpServletResponse response)  {
+    protected void rejectRequest(HttpServletResponse response) {
         try {
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getOutputStream().write("Invalid CORS request".getBytes(StandardCharsets.UTF_8));
@@ -295,6 +294,7 @@ public class DispatcherServlet extends HttpServlet {
 
             chain.applyPostHandle(req, resp);
         } catch (Exception ex) {
+            chain.applyPostHandle(req, resp);
             //这里只处理Exception，非Exception并没有处理，会继续抛出给doService处理
             //这个异常处理也只是处理了Handler整个执行层面的异常，
             // 视图渲染层面的异常是没有处理的，要处理的话可以在doService方法里处理
@@ -327,14 +327,9 @@ public class DispatcherServlet extends HttpServlet {
         viewResult.render(req, resp);
     }
 
-    protected String getUri(HttpServletRequest req) {
-        String contextPath = req.getContextPath();
-        return req.getRequestURI().substring(contextPath.length());
-    }
-
-    protected Handler getHandler(String uri) throws Exception {
+    protected Handler getHandler(HttpServletRequest req) throws Exception {
         for (HandlerMapping mapping : this.handlerMappings) {
-            Handler handler = mapping.getHandler(uri);
+            Handler handler = mapping.getHandler(req);
             if (handler != null) {
                 return handler;
             }

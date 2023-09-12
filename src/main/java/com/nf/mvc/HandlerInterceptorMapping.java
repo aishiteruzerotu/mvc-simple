@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.nf.mvc.annotation.Interceptor;
 import com.nf.mvc.annotation.ValueConstants;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 
 /**
@@ -23,17 +24,19 @@ public class HandlerInterceptorMapping {
     private final List<HandlerInterceptor> HANDLER_INTERCEPTORS = MvcContext.getMvcContext().getCustomHandlerInterceptors();
 
     //默认拦截地址
-    private final String  DEFAULT_MAPPING_URL = "/*";
+    private final String DEFAULT_MAPPING_URL = "/*";
 
-    private HandlerInterceptorMapping(){}
+    private HandlerInterceptorMapping() {
+    }
 
     //获取唯一的 HandlerInterceptorMapping 对象
-    public static HandlerInterceptorMapping getHandlerInterceptorMapping(){
+    public static HandlerInterceptorMapping getHandlerInterceptorMapping() {
         return new HandlerInterceptorMapping();
     }
 
     /**
      * 根据映射地址，创建一个新的集合，存放该映射地址的拦截器
+     *
      * @param url 映射地址
      * @return 生成新的拦截器集合
      */
@@ -41,7 +44,7 @@ public class HandlerInterceptorMapping {
         List<HandlerInterceptor> list = new ArrayList<>();
         for (HandlerInterceptor handlerInterceptor : HANDLER_INTERCEPTORS) {
             //判断拦截器是否支持拦截 当前映射 url
-            if (this.isMapping(handlerInterceptor,url)){
+            if (this.isMapping(handlerInterceptor, url)) {
                 list.add(handlerInterceptor);
             }
         }
@@ -50,19 +53,20 @@ public class HandlerInterceptorMapping {
 
     /**
      * 判断该对象是否是，当前请求的拦截器
+     *
      * @param handlerInterceptor 连接器
-     * @param url 请求地址
+     * @param url                请求地址
      * @return 是 返回真
      */
-    private boolean isMapping(HandlerInterceptor handlerInterceptor,String url){
+    private boolean isMapping(HandlerInterceptor handlerInterceptor, String url) {
         Class<? extends HandlerInterceptor> clz = handlerInterceptor.getClass();
         // 没有 Interceptor 注解 ，但是 HandlerInterceptor 的实现了，则直接返回真
         if (clz.isAnnotationPresent(Interceptor.class)) {
             Interceptor annotation = clz.getAnnotation(Interceptor.class);
             String value = annotation.value();
             /*
-            * 如果声明的映射范围是默认值 DEFAULT_MAPPING_URL = /*
-            * 则直接返回真
+             * 如果声明的映射范围是默认值 DEFAULT_MAPPING_URL = /*
+             * 则直接返回真
              */
             if (value.equals(DEFAULT_MAPPING_URL)) {
                 return true;
@@ -75,7 +79,7 @@ public class HandlerInterceptorMapping {
             }
 
             // 如果 value 值等于默认值，则按 注解的 values() 数组的值判断
-            if (ValueConstants.DEFAULT_NONE.equals(value)){
+            if (ValueConstants.DEFAULT_NONE.equals(value)) {
                 String[] values = annotation.values();
                 for (String s : values) {
                     //判断是否以默认值结尾 DEFAULT_MAPPING_URL
@@ -85,7 +89,7 @@ public class HandlerInterceptorMapping {
                     }
 
                     //当前映射地址被匹配返回真
-                    if (s.equals(url)){
+                    if (s.equals(url)) {
                         return true;
                     }
                 }
@@ -95,13 +99,14 @@ public class HandlerInterceptorMapping {
             //当前映射地址被匹配返回真
             //否则返回假
             return value.equals(url);
-        }else {
+        } else {
             return true;
         }
     }
 
     /**
      * 删除 默认值
+     *
      * @param value 注解获取到的值
      * @return 被删除默认值的字符串
      */
@@ -111,19 +116,27 @@ public class HandlerInterceptorMapping {
 
     /**
      * 删除 最后的 / 映射地址
+     *
      * @param url 请求地址
      * @return 被删最后的 / 映射地址的字符串
      */
-    private String deleteLastUrl(String url){
-        return url.substring(0,url.lastIndexOf("/")).toLowerCase(Locale.ROOT);
+    private String deleteLastUrl(String url) {
+        return url.substring(0, url.lastIndexOf("/")).toLowerCase(Locale.ROOT);
     }
 
     /**
      * 获取拦截器
-     * @param url 请求地址
+     *
+     * @param req 请求数据
      * @return 拦截器数组
      */
-    public List<HandlerInterceptor> getHandlerInterceptors(String url) {
+    public List<HandlerInterceptor> getHandlerInterceptors(HttpServletRequest req) {
+        String url = this.getUrl(req).toLowerCase(Locale.ROOT);
         return handlerInterceptors.get(url, k -> getHandlerInterceptorList(url));
+    }
+
+    protected String getUrl(HttpServletRequest req) {
+        String contextPath = req.getContextPath();
+        return req.getRequestURI().substring(contextPath.length());
     }
 }
