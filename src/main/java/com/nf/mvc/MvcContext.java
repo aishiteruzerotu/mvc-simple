@@ -16,7 +16,6 @@ import io.github.classgraph.ClassInfoList;
 import io.github.classgraph.ScanResult;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,12 +39,16 @@ public class MvcContext {
     private final List<Class<?>> allScanedClasses = new ArrayList<>();
 
     //用户定义实现类
-    private final List<HandlerMapping> customHandlerMappings = new ArrayList<>();
-    private final List<HandlerAdapter> customHandlerAdapters = new ArrayList<>();
-    private final List<ParameterProcessor> customParameterProcessors = new ArrayList<>();
-    private final List<HandlerExceptionResolver> customExceptionResolvers = new ArrayList<>();
-    private final List<HandlerInterceptor> customHandlerInterceptors = new ArrayList<>();
-    private final List<WebMvcConfigurer> customWebMvcConfigurer = new ArrayList<>();
+    /*
+    在通过反射获取对象的泛型参数的时候，就需要我们在创建对象的时候赋值为匿名子类
+    由于泛型擦除的原因，直接创建对象会擦除泛型类型，如果是以匿名子类的方式赋值，就可以通过反射得到类型的泛型参数
+     */
+    private final List<HandlerMapping> customHandlerMappings = new ArrayList<>(){};
+    private final List<HandlerAdapter> customHandlerAdapters = new ArrayList<>(){};
+    private final List<ParameterProcessor> customParameterProcessors = new ArrayList<>(){};
+    private final List<HandlerExceptionResolver> customExceptionResolvers = new ArrayList<>(){};
+    private final List<HandlerInterceptor> customHandlerInterceptors = new ArrayList<>(){};
+    private final List<WebMvcConfigurer> customWebMvcConfigurer = new ArrayList<>(){};
 
     //自身框架提供实现类
     private final List<HandlerMapping> defaultHandlerMappings = new ArrayList<>();
@@ -109,23 +112,8 @@ public class MvcContext {
         this.setList(scanedClass, this.customExceptionResolvers);
         this.setList(scanedClass, this.customHandlerInterceptors);
         this.setList(scanedClass, this.customWebMvcConfigurer);
-
-//        this.setList(scanedClass, HandlerMapping.class, this.customHandlerMappings);
-//        this.setList(scanedClass, HandlerAdapter.class, this.customHandlerAdapters);
-//        this.setList(scanedClass, ParameterProcessor.class, this.customParameterProcessors);
-//        this.setList(scanedClass, HandlerExceptionResolver.class, this.customExceptionResolvers);
-//        this.setList(scanedClass, HandlerInterceptor.class, this.customHandlerInterceptors);
-//        this.setList(scanedClass, WebMvcConfigurer.class, this.customWebMvcConfigurer);
     }
 
-    private <T> void setList(Class<?> scanedClass, Class<? extends T> clz, List<T> arr) {
-        if (clz.isAssignableFrom(scanedClass)) {
-            T exceptionResolver = (T) ReflectionUtils.newInstance(scanedClass);
-            arr.add(exceptionResolver);
-        }
-    }
-
-    // TODO: 待解决集合对象获取泛型参数
     private <T> void setList(Class<?> scanedClass, List<T> arr) {
         if (this.isListGenericity(scanedClass, arr)) {
             T exceptionResolver = (T) ReflectionUtils.newInstance(scanedClass);
