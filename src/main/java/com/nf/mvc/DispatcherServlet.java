@@ -206,9 +206,8 @@ public class DispatcherServlet extends HttpServlet {
         HandlerContext context = HandlerContext.getContext();
         context.setRequest(req).setResponse(resp);
         try {
-            Handler handler = this.getHandler(req);
-            if (handler != null) {
-                HandlerExecutionChain handlerExecutionChain = this.getHandlerExecutionChain(handler, req);
+            HandlerExecutionChain handlerExecutionChain = this.getHandlerExecutionChain(req);
+            if (handlerExecutionChain != null) {
                 this.doDispatch(req, resp, handlerExecutionChain);
             } else {
                 this.noHandlerFound(req, resp);
@@ -221,8 +220,8 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    protected HandlerExecutionChain getHandlerExecutionChain(Handler handler, HttpServletRequest req) {
-        return new HandlerExecutionChain(handler, this.handlerInterceptorMapping.getHandlerInterceptors(req));
+    protected HandlerExecutionChain getHandlerExecutionChain(HttpServletRequest req) {
+        return this.handlerInterceptorMapping.getHandlerExecutionChain(req);
     }
 
     /**
@@ -325,16 +324,6 @@ public class DispatcherServlet extends HttpServlet {
 
     protected void render(HttpServletRequest req, HttpServletResponse resp, ViewResult viewResult) throws ServletException, IOException {
         viewResult.render(req, resp);
-    }
-
-    protected Handler getHandler(HttpServletRequest req) throws Exception {
-        for (HandlerMapping mapping : this.handlerMappings) {
-            Handler handler = mapping.getHandler(req);
-            if (handler != null) {
-                return handler;
-            }
-        }
-        return null;
     }
 
     protected ViewResult getViewResult(HttpServletRequest req, HttpServletResponse resp, Handler handler) throws Exception {

@@ -13,7 +13,7 @@ import java.util.*;
  */
 public class HandlerInterceptorMapping {
     // Caffeine 动态清理缓存
-    private final Cache<String, List<HandlerInterceptor>> handlerInterceptors = Caffeine.newBuilder()
+    private final Cache<String, HandlerExecutionChain> handlerExecutionChains = Caffeine.newBuilder()
             // 初始数量 20
             .initialCapacity(20)
             // 缓存最大条目数 50
@@ -124,15 +124,26 @@ public class HandlerInterceptorMapping {
         return url.substring(0, url.lastIndexOf("/")).toLowerCase(Locale.ROOT);
     }
 
-    /**
-     * 获取拦截器
-     *
-     * @param req 请求数据
-     * @return 拦截器数组
-     */
-    public List<HandlerInterceptor> getHandlerInterceptors(HttpServletRequest req) {
+    public HandlerExecutionChain getHandlerExecutionChain(HttpServletRequest req){
         String url = this.getUrl(req).toLowerCase(Locale.ROOT);
-        return handlerInterceptors.get(url, k -> getHandlerInterceptorList(url));
+
+        return this.handlerExecutionChains.get(url, k -> {
+            Handler handler = this.getHandler(req);
+            if (handler!=null){
+                return new HandlerExecutionChain(handler, this.getHandlerInterceptorList(url));
+            }
+            return null;
+        });
+    }
+
+    protected Handler getHandler(HttpServletRequest req) {
+        for (HandlerMapping mapping : MvcContext.getMvcContext().getHandlerMappings()) {
+            Handler handler = mapping.getHandler(req);
+            if (handler != null) {
+                return handler;
+            }
+        }
+        return null;
     }
 
     protected String getUrl(HttpServletRequest req) {
